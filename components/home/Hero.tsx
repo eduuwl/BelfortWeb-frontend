@@ -43,7 +43,7 @@ export default function Hero() {
           style={{ animationDelay: "0.1s" }}
         >
           <span className="block h-0.5 w-6 bg-[var(--red-glow)]" />
-          Musculação &amp; Cross Training
+          Academia &amp; Studio de Musculação
         </div>
 
         <h1
