@@ -39,6 +39,16 @@ export interface AvaliacaoPayload {
   valor: string;
 }
 
+export interface AvaliacaoNutricionalPayload {
+  nome: string;
+  whatsapp: string;
+  unidade: string;
+  dia: string;
+  data: string;
+  horario: string;
+  valor: string;
+}
+
 export type SubmitResult = { ok: true } | { ok: false; status: number; message: string };
 
 const MENSAGEM_ERRO_PADRAO = 'Não conseguimos processar sua solicitação agora. Tente novamente em instantes.';
@@ -71,4 +81,8 @@ export function submitCortesia(payload: CortesiaPayload) {
 
 export function submitAvaliacaoFisica(payload: AvaliacaoPayload) {
   return post('/avaliacao-fisica', payload);
+}
+
+export function submitAvaliacaoNutricional(payload: AvaliacaoNutricionalPayload) {
+  return post('/avaliacao-nutricional', payload);
 }

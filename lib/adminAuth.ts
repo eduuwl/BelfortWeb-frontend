@@ -49,3 +49,50 @@ export async function proxyAdminList(backendPath: string, search: string): Promi
   const data = await res.json().catch(() => null);
   return NextResponse.json(data, { status: res.status });
 }
+
+/** Repassa um DELETE de registro pro backend externo, com o Bearer token. */
+export async function proxyAdminDelete(backendPath: string): Promise<NextResponse> {
+  const token = await getAdminToken();
+  if (!token) {
+    return NextResponse.json({ message: "Sessão expirada. Faça login novamente." }, { status: 401 });
+  }
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${backendPath}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    return NextResponse.json({ message: "Falha de conexão com o servidor. Tente novamente." }, { status: 502 });
+  }
+
+  if (res.status === 204) {
+    return new NextResponse(null, { status: 204 });
+  }
+
+  const data = await res.json().catch(() => null);
+  return NextResponse.json(data, { status: res.status });
+}
+
+/** Repassa uma ação PATCH (ex.: confirmar presença) pro backend externo, com o Bearer token. */
+export async function proxyAdminPatch(backendPath: string, body: unknown): Promise<NextResponse> {
+  const token = await getAdminToken();
+  if (!token) {
+    return NextResponse.json({ message: "Sessão expirada. Faça login novamente." }, { status: 401 });
+  }
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${backendPath}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    return NextResponse.json({ message: "Falha de conexão com o servidor. Tente novamente." }, { status: 502 });
+  }
+
+  const data = await res.json().catch(() => null);
+  return NextResponse.json(data, { status: res.status });
+}

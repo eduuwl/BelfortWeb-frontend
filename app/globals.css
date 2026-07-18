@@ -72,6 +72,15 @@ body {
 
 /* ── Animações ── */
 
+@keyframes admin-undo-shrink {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
 @keyframes fadeUp {
   from {
     opacity: 0;

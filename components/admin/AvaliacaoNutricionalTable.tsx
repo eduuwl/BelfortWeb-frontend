@@ -1,22 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { deleteAvaliacao, type AvaliacaoRecord } from "@/lib/adminApi";
-import { buildAvaliacaoConfirmMessage, whatsappLinkForCustomer } from "@/lib/whatsappTemplates";
+import { deleteAvaliacaoNutricional, type AvaliacaoNutricionalRecord } from "@/lib/adminApi";
+import { buildGenericContatoMessage, whatsappLinkForCustomer } from "@/lib/whatsappTemplates";
 import { useSoftDelete } from "@/lib/useSoftDelete";
 import ConfirmDialog from "./ConfirmDialog";
 import UndoToast from "./UndoToast";
 import DeleteButton from "./DeleteButton";
 
-export default function AvaliacaoTable({ records }: { records: AvaliacaoRecord[] }) {
-  const [confirmAlvo, setConfirmAlvo] = useState<AvaliacaoRecord | null>(null);
+export default function AvaliacaoNutricionalTable({ records }: { records: AvaliacaoNutricionalRecord[] }) {
+  const [confirmAlvo, setConfirmAlvo] = useState<AvaliacaoNutricionalRecord | null>(null);
   const { items, pending, requestDelete, undo, undoWindowMs, error, dismissError } = useSoftDelete(
     records,
-    deleteAvaliacao,
+    deleteAvaliacaoNutricional,
   );
 
   if (items.length === 0) {
-    return <p className="text-[0.85rem] text-[var(--gray)]">Nenhuma avaliação agendada ainda.</p>;
+    return <p className="text-[0.85rem] text-[var(--gray)]">Nenhuma avaliação nutricional agendada ainda.</p>;
   }
 
   return (
@@ -46,10 +46,7 @@ export default function AvaliacaoTable({ records }: { records: AvaliacaoRecord[]
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-2">
                     <a
-                      href={whatsappLinkForCustomer(
-                        r.whatsapp,
-                        buildAvaliacaoConfirmMessage({ nome: r.nome, diaSemana: r.dia, data: r.data, horario: r.horario }),
-                      )}
+                      href={whatsappLinkForCustomer(r.whatsapp, buildGenericContatoMessage(r.nome))}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-block rounded-lg bg-[#25D366] px-3 py-1.5 text-[0.78rem] font-semibold text-white transition-colors hover:bg-[#1da851]"
@@ -68,7 +65,7 @@ export default function AvaliacaoTable({ records }: { records: AvaliacaoRecord[]
       {confirmAlvo && (
         <ConfirmDialog
           title="Apagar registro?"
-          message={`Tem certeza que deseja apagar a avaliação física de ${confirmAlvo.nome}?`}
+          message={`Tem certeza que deseja apagar a avaliação nutricional de ${confirmAlvo.nome}?`}
           onCancel={() => setConfirmAlvo(null)}
           onConfirm={() => {
             requestDelete(confirmAlvo);

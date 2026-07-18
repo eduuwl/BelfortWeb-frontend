@@ -8,7 +8,8 @@ import { adminLogout } from "@/lib/adminApi";
 const TABS = [
   { href: "/admin/matriculas", label: "Pré-cadastros" },
   { href: "/admin/cortesias", label: "Cortesias" },
-  { href: "/admin/avaliacoes", label: "Avaliações" },
+  { href: "/admin/avaliacoes", label: "Avaliações Físicas" },
+  { href: "/admin/avaliacoes-nutricionais", label: "Avaliações Nutricionais" },
 ];
 
 export default function AdminShell({ children }: { children: ReactNode }) {

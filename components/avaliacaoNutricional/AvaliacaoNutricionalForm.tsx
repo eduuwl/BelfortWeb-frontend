@@ -34,12 +34,12 @@ import {
 import { maskPhone } from "@/lib/validators";
 import { DIAS_AVALIACAO, HORARIOS_AVALIACAO_MANHA, HORARIOS_AVALIACAO_TARDE } from "@/lib/horarios";
 import { proximaData, formatarDataBr } from "@/lib/dateUtils";
-import { submitAvaliacaoFisica } from "@/lib/api";
+import { submitAvaliacaoNutricional } from "@/lib/api";
 import { clearFormPersistence, useFormPersistence } from "@/lib/useFormPersistence";
 import { trackEvent } from "@/lib/analytics";
 import type { Unidade } from "@/lib/planos";
 
-const STORAGE_KEY = "belfort:avaliacao";
+const STORAGE_KEY = "belfort:avaliacao-nutricional";
 
 type Step = 1 | 2 | 3 | 4 | 5 | "sucesso";
 
@@ -65,7 +65,7 @@ function unidadeLabel(u: Unidade | null): string {
   return u === "telegrafo" ? "Telégrafo" : u === "sacramenta" ? "Sacramenta" : "";
 }
 
-export default function AvaliacaoForm() {
+export default function AvaliacaoNutricionalForm() {
   const [step, setStep] = useState<Step>(1);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [form, setForm] = useState<FormState>(INITIAL_STATE);
@@ -89,7 +89,7 @@ export default function AvaliacaoForm() {
   );
 
   useEffect(() => {
-    trackEvent("form_start", { form: "avaliacao" });
+    trackEvent("form_start", { form: "avaliacao-nutricional" });
   }, []);
 
   const stepAnim = direction === 1 ? "animate-step-fwd" : "animate-step-back";
@@ -97,7 +97,7 @@ export default function AvaliacaoForm() {
   function goTo(next: Step) {
     setDirection(typeof step === "number" && typeof next === "number" && next < step ? -1 : 1);
     setStep(next);
-    trackEvent(next === "sucesso" ? "form_complete" : "form_step", { form: "avaliacao", step: next });
+    trackEvent(next === "sucesso" ? "form_complete" : "form_step", { form: "avaliacao-nutricional", step: next });
   }
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
@@ -116,21 +116,21 @@ export default function AvaliacaoForm() {
     setLoading(true);
     setSubmitError(null);
 
-    const result = await submitAvaliacaoFisica({
+    const result = await submitAvaliacaoNutricional({
       nome: form.nome.trim(),
       whatsapp: form.whatsapp.trim(),
       unidade: unidadeLabel(form.unidade),
       dia: form.dia,
       data: dataAvaliacao,
       horario: form.horario,
-      valor: "R$ 80,00",
+      valor: "R$ 150,00",
     });
 
     setLoading(false);
 
     if (!result.ok) {
       setSubmitError(result.message);
-      trackEvent("form_error", { form: "avaliacao", message: result.message });
+      trackEvent("form_error", { form: "avaliacao-nutricional", message: result.message });
       return;
     }
 
@@ -139,7 +139,7 @@ export default function AvaliacaoForm() {
   }
 
   const whatsMsg = encodeURIComponent(
-    `Olá! Acabei de agendar minha avaliação física na Academia Belfort (unidade ${unidadeLabel(
+    `Olá! Acabei de agendar minha avaliação nutricional na Academia Belfort (unidade ${unidadeLabel(
       form.unidade,
     )}) para ${form.dia} dia ${dataAvaliacao} às ${form.horario}. Nome: ${form.nome.trim()}`,
   );
@@ -149,8 +149,8 @@ export default function AvaliacaoForm() {
       <FormNav />
 
       <FormHero
-        subtitle="Conheça seu ponto de partida"
-        tag="Avaliação Física"
+        subtitle="Alimentação a favor dos seus objetivos"
+        tag="Avaliação Nutricional"
         heroBgClassName="bg-[var(--blue-mid)] pb-20 pt-20"
         tagBgClassName="bg-[var(--red)]"
       />
@@ -179,7 +179,7 @@ export default function AvaliacaoForm() {
           {step === 1 && (
             <div className={stepAnim}>
               <StepTitle>Seus dados</StepTitle>
-              <StepDesc>Vamos agendar sua avaliação física e bioimpedância.</StepDesc>
+              <StepDesc>Vamos agendar sua avaliação nutricional.</StepDesc>
 
               <FieldInput label="Nome completo" value={form.nome} onChange={(v) => update("nome", v)} placeholder="Ex: João Silva" />
               <FieldInput
@@ -190,7 +190,7 @@ export default function AvaliacaoForm() {
               />
 
               <AvisoBox>
-                <strong>Investimento: R$ 80,00.</strong> O pagamento é feito na recepção ou via Pix no dia da
+                <strong>Investimento: R$ 150,00.</strong> O pagamento é feito na recepção ou via Pix no dia da
                 avaliação — ainda não temos pagamento online no site.
               </AvisoBox>
 
@@ -221,7 +221,7 @@ export default function AvaliacaoForm() {
             <div className={stepAnim}>
               <BtnBack onClick={() => goTo(2)} />
               <StepTitle>Escolha o dia</StepTitle>
-              <StepDesc>Atendemos avaliação física de segunda a sexta.</StepDesc>
+              <StepDesc>Atendemos avaliação nutricional de segunda a sexta.</StepDesc>
 
               <div className="mb-5 grid grid-cols-3 gap-2">
                 {DIAS_AVALIACAO.map((d) => (
@@ -273,7 +273,7 @@ export default function AvaliacaoForm() {
                 <ResumoItem label="Unidade" value={unidadeLabel(form.unidade)} />
                 <ResumoItem label="Dia" value={`${form.dia} (${dataAvaliacao})`} />
                 <ResumoItem label="Horário" value={form.horario ?? ""} />
-                <ResumoItem label="Investimento" value="R$ 80,00" />
+                <ResumoItem label="Investimento" value="R$ 150,00" />
               </div>
 
               {submitError && (
@@ -289,7 +289,7 @@ export default function AvaliacaoForm() {
               <SuccessIcon />
               <SuccessTitle>Agendado!</SuccessTitle>
               <SuccessMsg>
-                Olá {form.nome.trim().split(" ")[0]}! Sua avaliação física foi agendada com sucesso.
+                Olá {form.nome.trim().split(" ")[0]}! Sua avaliação nutricional foi agendada com sucesso.
               </SuccessMsg>
 
               <SuccessBox>
@@ -297,7 +297,7 @@ export default function AvaliacaoForm() {
                 <br />
                 {form.dia}, {dataAvaliacao} às {form.horario}
                 <br />
-                Investimento: R$ 80,00 (recepção ou Pix no dia)
+                Investimento: R$ 150,00 (recepção ou Pix no dia)
               </SuccessBox>
 
               <div className="mb-6 rounded-xl bg-[#EEF3FC] p-4 text-center text-[0.82rem] leading-relaxed text-[var(--blue)]">

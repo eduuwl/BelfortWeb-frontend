@@ -94,11 +94,20 @@ export default function CortesiaForm() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [restaurado, setRestaurado] = useState(false);
 
-  useFormPersistence(STORAGE_KEY, { form, step }, (saved) => {
-    setForm(saved.form);
-    setStep(saved.step);
-    if (saved.step !== 1) setRestaurado(true);
-  });
+  useFormPersistence(
+    STORAGE_KEY,
+    { form, step },
+    (saved) => {
+      if (saved.step === "sucesso") {
+        clearFormPersistence(STORAGE_KEY);
+        return;
+      }
+      setForm(saved.form);
+      setStep(saved.step);
+      if (saved.step !== 1) setRestaurado(true);
+    },
+    { paused: step === "sucesso" },
+  );
 
   useEffect(() => {
     trackEvent("form_start", { form: "cortesia" });

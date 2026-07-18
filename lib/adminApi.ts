@@ -1,6 +1,6 @@
 "use client";
 
-import type { AvaliacaoPayload, CortesiaPayload, MatriculaPayload } from "@/lib/api";
+import type { AvaliacaoNutricionalPayload, AvaliacaoPayload, CortesiaPayload, MatriculaPayload } from "@/lib/api";
 
 export interface MatriculaRecord extends MatriculaPayload {
   id: string;
@@ -10,9 +10,15 @@ export interface MatriculaRecord extends MatriculaPayload {
 export interface CortesiaRecord extends CortesiaPayload {
   id: string;
   createdAt: string;
+  presencaConfirmada: boolean;
 }
 
 export interface AvaliacaoRecord extends AvaliacaoPayload {
+  id: string;
+  createdAt: string;
+}
+
+export interface AvaliacaoNutricionalRecord extends AvaliacaoNutricionalPayload {
   id: string;
   createdAt: string;
 }
@@ -58,6 +64,10 @@ export function fetchAvaliacoes(page = 1) {
   return getList<AvaliacaoRecord>(`/api/admin/avaliacao-fisica?page=${page}`);
 }
 
+export function fetchAvaliacoesNutricionais(page = 1) {
+  return getList<AvaliacaoNutricionalRecord>(`/api/admin/avaliacao-nutricional?page=${page}`);
+}
+
 export type LoginResult = { ok: true } | { ok: false; message: string };
 
 export async function adminLogin(usuario: string, senha: string): Promise<LoginResult> {
@@ -79,4 +89,53 @@ export async function adminLogin(usuario: string, senha: string): Promise<LoginR
 
 export async function adminLogout() {
   await fetch("/api/admin/logout", { method: "POST" });
+}
+
+export type ActionResult = { ok: true } | { ok: false; message: string };
+
+export async function confirmarPresencaCortesia(id: string, confirmada: boolean): Promise<ActionResult> {
+  try {
+    const res = await fetch(`/api/admin/cortesia/${id}/presenca`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ confirmada }),
+    });
+
+    if (res.ok) return { ok: true };
+
+    const data = await res.json().catch(() => null);
+    const message = Array.isArray(data?.message) ? data.message[0] : data?.message;
+    return { ok: false, message: message ?? "Não foi possível atualizar a presença." };
+  } catch {
+    return { ok: false, message: "Falha de conexão. Verifique sua internet e tente novamente." };
+  }
+}
+
+async function deleteViaApi(path: string): Promise<ActionResult> {
+  try {
+    const res = await fetch(path, { method: "DELETE" });
+    if (res.ok) return { ok: true };
+
+    const data = await res.json().catch(() => null);
+    const message = Array.isArray(data?.message) ? data.message[0] : data?.message;
+    return { ok: false, message: message ?? "Não foi possível apagar o registro." };
+  } catch {
+    return { ok: false, message: "Falha de conexão. Verifique sua internet e tente novamente." };
+  }
+}
+
+export function deleteMatricula(id: string) {
+  return deleteViaApi(`/api/admin/matricula/${id}`);
+}
+
+export function deleteCortesia(id: string) {
+  return deleteViaApi(`/api/admin/cortesia/${id}`);
+}
+
+export function deleteAvaliacao(id: string) {
+  return deleteViaApi(`/api/admin/avaliacao-fisica/${id}`);
+}
+
+export function deleteAvaliacaoNutricional(id: string) {
+  return deleteViaApi(`/api/admin/avaliacao-nutricional/${id}`);
 }
