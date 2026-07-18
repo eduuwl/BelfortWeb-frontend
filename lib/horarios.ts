@@ -4,7 +4,7 @@ export interface HorarioSlot {
   somenteSabado?: boolean;
 }
 
-function gerarSlots(inicioHora: number, fimHora: number, passoMinutos: number): HorarioSlot[] {
+export function gerarSlots(inicioHora: number, fimHora: number, passoMinutos: number): HorarioSlot[] {
   const slots: HorarioSlot[] = [];
   for (let mins = inicioHora * 60; mins <= fimHora * 60; mins += passoMinutos) {
     const h = Math.floor(mins / 60).toString().padStart(2, '0');
@@ -36,6 +36,12 @@ export const HORARIOS_KIDS: HorarioSlot[] = [{ value: '17:00', label: '17:00 –
 export const DIAS_KIDS = ['Segunda', 'Quarta', 'Sexta'];
 
 export const DIAS_SEMANA = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+
+// Avaliação Física: horários fixos de manhã e tarde, Segunda a Sexta.
+export const HORARIOS_AVALIACAO_MANHA: HorarioSlot[] = gerarSlots(7, 10.5, 30);
+export const HORARIOS_AVALIACAO_TARDE: HorarioSlot[] = gerarSlots(17, 20.5, 30);
+
+export const DIAS_AVALIACAO = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
 
 export const DIAS_CONSECUTIVOS: Record<string, string[]> = {
   Segunda: ['Segunda', 'Terça', 'Quarta'],

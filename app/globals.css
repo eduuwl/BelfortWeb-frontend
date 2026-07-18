@@ -56,6 +56,20 @@ body {
   --text: #111111;
 }
 
+.theme-avaliacao {
+  --red: #cc3738;
+  --red-dark: #8f1f20;
+  --red-light: #ff4444;
+  --blue: #0d3b3e;
+  --blue-mid: #145559;
+  --blue-light: #1c7a80;
+  --white: #ffffff;
+  --off-white: #f5f4f0;
+  --gray: #9a9a9a;
+  --gray-light: #e8e8e4;
+  --text: #111111;
+}
+
 /* ── Animações ── */
 
 @keyframes fadeUp {

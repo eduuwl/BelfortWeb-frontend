@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 export interface MatriculaPayload {
   nome: string;
@@ -29,6 +29,16 @@ export interface CortesiaPayload {
   limitacao: string;
 }
 
+export interface AvaliacaoPayload {
+  nome: string;
+  whatsapp: string;
+  unidade: string;
+  dia: string;
+  data: string;
+  horario: string;
+  valor: string;
+}
+
 export type SubmitResult = { ok: true } | { ok: false; status: number; message: string };
 
 const MENSAGEM_ERRO_PADRAO = 'Não conseguimos processar sua solicitação agora. Tente novamente em instantes.';
@@ -57,4 +67,8 @@ export function submitMatricula(payload: MatriculaPayload) {
 
 export function submitCortesia(payload: CortesiaPayload) {
   return post('/cortesia', payload);
+}
+
+export function submitAvaliacaoFisica(payload: AvaliacaoPayload) {
+  return post('/avaliacao-fisica', payload);
 }

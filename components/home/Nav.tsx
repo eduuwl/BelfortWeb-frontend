@@ -64,6 +64,15 @@ export default function Nav() {
           </li>
           <li>
             <Link
+              href="/avaliacao-fisica"
+              className="group relative text-[0.82rem] font-medium tracking-[0.1em] uppercase text-white/70 transition-colors hover:text-white"
+            >
+              Avaliação Física
+              <span className="absolute -bottom-1 left-0 h-[1.5px] w-0 bg-[var(--red-glow)] transition-all duration-300 group-hover:w-full" />
+            </Link>
+          </li>
+          <li>
+            <Link
               href="/matricula"
               className="rounded-md bg-[var(--red)] px-[1.2rem] py-2 font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[var(--red-dark)] hover:shadow-[0_6px_20px_rgba(204,55,56,0.4)] active:scale-95"
             >
@@ -109,6 +118,13 @@ export default function Nav() {
           className="font-heading text-[2.5rem] tracking-[0.06em] text-white transition-colors hover:text-[var(--red)]"
         >
           Galeria
+        </Link>
+        <Link
+          href="/avaliacao-fisica"
+          onClick={() => setMenuOpen(false)}
+          className="font-heading text-[2.5rem] tracking-[0.06em] text-white transition-colors hover:text-[var(--red)]"
+        >
+          Avaliação Física
         </Link>
         <Link
           href="/cortesia"
