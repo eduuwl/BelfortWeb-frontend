@@ -47,14 +47,14 @@ export default function Modalidades() {
           <span className="block h-0.5 w-5 bg-[var(--red)]" />
           O que oferecemos
         </div>
-        <h2 className="font-heading mb-12 text-[clamp(2.5rem,6vw,4.5rem)] leading-[0.95] tracking-[0.02em]">
+        <h2 className="font-heading mb-12 text-[clamp(2.5rem,6vw,4.5rem)] leading-[0.95] tracking-[0.02em] text-[var(--blue)]">
           Nossas
           <br />
           modalidades
         </h2>
       </Reveal>
 
-      <div className="grid grid-cols-1 gap-[1.5px] overflow-hidden rounded-[20px] bg-white/[0.06] md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-[1.5px] overflow-hidden rounded-[20px] bg-[var(--gray-light)] md:grid-cols-2">
         {MODALIDADES.map((m, i) => (
           <Reveal key={m.nome} delay={i * 100} className="h-full">
             <div className="group relative h-full overflow-hidden bg-[var(--blue-mid)] px-10 py-12 transition-all duration-300 hover:z-10 hover:-translate-y-1 hover:bg-[var(--blue-light)] hover:shadow-[0_20px_45px_rgba(0,0,0,0.35)]">

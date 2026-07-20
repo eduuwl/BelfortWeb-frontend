@@ -220,12 +220,67 @@ reformatar, mascarar ou alterar esse valor em nenhuma etapa.
 
 ## 6. CORS
 
-- `POST /matricula`, `POST /cortesia`, `POST /avaliacao-fisica`, `POST /avaliacao-nutricional`:
-  precisam aceitar requisições cross-origin do domínio do site (`Content-Type` como header permitido).
+- `POST /matricula`, `POST /cortesia`, `POST /avaliacao-fisica`, `POST /avaliacao-nutricional`,
+  `GET /banners`: precisam aceitar requisições cross-origin do domínio do site (`Content-Type`
+  como header permitido).
 - `POST /admin/login`, `GET /matricula`, `GET /cortesia`, `GET /avaliacao-fisica`,
-  `GET /avaliacao-nutricional`, `PATCH /cortesia/:id/presenca`, e todos os `DELETE /:recurso/:id`
-  (seção 5.2): chamados exclusivamente servidor-a-servidor pelo Next.js — **não precisam de
+  `GET /avaliacao-nutricional`, `PATCH /cortesia/:id/presenca`, `GET /admin/banners`,
+  `POST /admin/banners`, `PATCH /admin/banners/:id`, e todos os `DELETE /:recurso/:id`
+  (seção 5.2 e 6.1): chamados exclusivamente servidor-a-servidor pelo Next.js — **não precisam de
   configuração de CORS**.
+
+## 6.1 Banners (carrossel da home)
+
+Novo recurso: imagens promocionais que rodam em carrossel no topo da home, gerenciadas pela
+recepção via área administrativa. O armazenamento em si (Neon, S3, o que for) é decisão de quem
+implementar o backend — o contrato abaixo só define a API que o frontend consome.
+
+### `GET /banners`
+
+Público, **precisa de CORS liberado** (mesma exigência da seção 6, ainda que hoje o frontend chame
+esse endpoint só a partir do servidor Next.js — deixamos CORS aberto por segurança/flexibilidade
+futura). Retorna só os banners com `ativo: true`, ordenados por `ordem` crescente.
+
+Resposta (`200`):
+```json
+{ "data": [ { "id": "...", "imageUrl": "...", "ordem": 1, "ativo": true, "link": null, "alt": "...", "createdAt": "..." } ] }
+```
+
+### `GET /admin/banners`
+
+Chamado apenas pelo Route Handler `app/api/admin/banners/route.ts` — **não precisa de CORS**.
+Header obrigatório: `Authorization: Bearer <token>`. Retorna **todos** os banners (ativos e
+inativos), mesmo formato paginado da seção 5:
+```json
+{ "data": [ /* BannerRecord[] */ ], "total": 4, "page": 1, "limit": 20 }
+```
+
+### `POST /admin/banners`
+
+Chamado apenas pelo Route Handler acima — **não precisa de CORS**. Corpo `multipart/form-data`:
+
+| Campo    | Descrição                                                          |
+| -------- | --------------------------------------------------------------------- |
+| `imagem` | Arquivo de imagem. Recomendado: 1600×500px (faixa larga, ~16:5), JPG ou WebP, até 5MB (recomendação, não bloqueio obrigatório) |
+| `ordem`  | `number` — posição no carrossel                                       |
+| `ativo`  | `boolean` — se aparece no carrossel público                           |
+| `link`   | `string` opcional — URL de destino ao clicar no banner                |
+| `alt`    | `string` — texto alternativo da imagem                                |
+
+Resposta de sucesso: `BannerRecord` criado (formato da seção `GET /banners` acima, mais `id` e
+`createdAt`).
+
+### `PATCH /admin/banners/:id`
+
+Chamado apenas pelo Route Handler `app/api/admin/banners/[id]/route.ts` — **não precisa de CORS**.
+Atualiza metadados (`ordem`, `ativo`, `link`, `alt`) — **não** troca a imagem em si; para isso,
+apagar o banner e subir um novo. Corpo: qualquer subconjunto desses campos. Resposta de sucesso:
+`2xx`.
+
+### `DELETE /admin/banners/:id`
+
+Mesma convenção da seção 5.2 — remove o banner e a imagem associada. Header obrigatório:
+`Authorization: Bearer <token>`.
 
 ## 7. Itens em aberto para quem for implementar o backend
 

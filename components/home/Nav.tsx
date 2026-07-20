@@ -24,10 +24,8 @@ export default function Nav() {
   return (
     <>
       <nav
-        className={`fixed inset-x-0 top-0 z-[100] flex items-center justify-between px-8 py-[1.2rem] transition-all duration-[400ms] ${
-          scrolled
-            ? "bg-[rgba(13,31,60,0.95)] backdrop-blur-md border-b border-white/[0.06] shadow-lg shadow-black/20"
-            : ""
+        className={`fixed inset-x-0 top-0 z-[100] flex items-center justify-between bg-[rgba(13,31,60,0.55)] px-8 py-[1.2rem] backdrop-blur-md transition-all duration-[400ms] ${
+          scrolled ? "bg-[rgba(13,31,60,0.95)] border-b border-white/[0.06] shadow-lg shadow-black/20" : ""
         }`}
       >
         <Link href="/" className="transition-transform hover:scale-105">
@@ -53,6 +51,15 @@ export default function Nav() {
               </Link>
             </li>
           ))}
+          <li>
+            <Link
+              href="/sobre"
+              className="group relative text-[0.82rem] font-medium tracking-[0.1em] uppercase text-white/70 transition-colors hover:text-white"
+            >
+              Sobre
+              <span className="absolute -bottom-1 left-0 h-[1.5px] w-0 bg-[var(--red-glow)] transition-all duration-300 group-hover:w-full" />
+            </Link>
+          </li>
           <li>
             <Link
               href="/galeria"
@@ -121,6 +128,13 @@ export default function Nav() {
             {l.label}
           </Link>
         ))}
+        <Link
+          href="/sobre"
+          onClick={() => setMenuOpen(false)}
+          className="font-heading text-[2.5rem] tracking-[0.06em] text-white transition-colors hover:text-[var(--red)]"
+        >
+          Sobre
+        </Link>
         <Link
           href="/galeria"
           onClick={() => setMenuOpen(false)}

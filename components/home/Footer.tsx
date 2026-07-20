@@ -1,4 +1,6 @@
 import Image from "next/image";
+import Link from "next/link";
+import CookiePreferencesButton from "@/components/legal/CookiePreferencesButton";
 
 export default function Footer() {
   return (
@@ -6,7 +8,7 @@ export default function Footer() {
       <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-6">
         <Image src="/images/logo.png" alt="Academia Belfort" width={1005} height={334} className="h-7 w-auto" />
         <div className="text-[0.78rem] text-white/30">Academia Belfort © 2026 · Belém, PA</div>
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-4">
           <a
             href="https://www.instagram.com/academiabelfort/"
             target="_blank"
@@ -23,6 +25,25 @@ export default function Footer() {
           >
             Facebook
           </a>
+          <Link
+            href="/sobre"
+            className="text-[0.78rem] uppercase tracking-[0.08em] text-white/40 transition-colors hover:text-white"
+          >
+            Sobre Nós
+          </Link>
+          <Link
+            href="/politica-de-privacidade"
+            className="text-[0.78rem] uppercase tracking-[0.08em] text-white/40 transition-colors hover:text-white"
+          >
+            Política de Privacidade
+          </Link>
+          <Link
+            href="/termos-de-uso"
+            className="text-[0.78rem] uppercase tracking-[0.08em] text-white/40 transition-colors hover:text-white"
+          >
+            Termos de Uso
+          </Link>
+          <CookiePreferencesButton />
         </div>
       </div>
     </footer>

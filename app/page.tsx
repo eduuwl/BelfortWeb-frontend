@@ -1,8 +1,8 @@
 import Nav from "@/components/home/Nav";
-import Hero from "@/components/home/Hero";
+import HeroCarousel from "@/components/home/HeroCarousel";
 import ColetivasSection from "@/components/home/ColetivasSection";
 import Modalidades from "@/components/home/Modalidades";
-import Planos from "@/components/home/Planos";
+import PlanosTeaser from "@/components/home/PlanosTeaser";
 import Unidades from "@/components/home/Unidades";
 import Faq from "@/components/home/Faq";
 import CtaBanner from "@/components/home/CtaBanner";
@@ -10,6 +10,7 @@ import Footer from "@/components/home/Footer";
 import WhatsFloat from "@/components/home/WhatsFloat";
 import { UNIDADES } from "@/lib/unidades";
 import { FAQ } from "@/lib/faq";
+import { getBanners } from "@/lib/api";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
@@ -64,7 +65,9 @@ function jsonLd() {
   };
 }
 
-export default function Home() {
+export default async function Home() {
+  const banners = await getBanners();
+
   return (
     <div className="theme-home overflow-x-hidden bg-[var(--blue)] text-white">
       <script
@@ -72,12 +75,12 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd()) }}
       />
       <Nav />
-      <Hero />
-      <section id="modalidades" className="bg-[var(--blue)] px-8 py-24">
+      <HeroCarousel banners={banners} />
+      <PlanosTeaser />
+      <section id="modalidades" className="bg-[var(--cream)] px-8 py-24">
         <ColetivasSection />
         <Modalidades />
       </section>
-      <Planos />
       <Unidades />
       <Faq />
       <CtaBanner />

@@ -10,6 +10,7 @@ const TABS = [
   { href: "/admin/cortesias", label: "Cortesias" },
   { href: "/admin/avaliacoes", label: "Avaliações Físicas" },
   { href: "/admin/avaliacoes-nutricionais", label: "Avaliações Nutricionais" },
+  { href: "/admin/banners", label: "Banners" },
 ];
 
 export default function AdminShell({ children }: { children: ReactNode }) {

@@ -49,6 +49,16 @@ export interface AvaliacaoNutricionalPayload {
   valor: string;
 }
 
+export interface BannerRecord {
+  id: string;
+  imageUrl: string;
+  ordem: number;
+  ativo: boolean;
+  link: string | null;
+  alt: string;
+  createdAt: string;
+}
+
 export type SubmitResult = { ok: true } | { ok: false; status: number; message: string };
 
 const MENSAGEM_ERRO_PADRAO = 'Não conseguimos processar sua solicitação agora. Tente novamente em instantes.';
@@ -85,4 +95,15 @@ export function submitAvaliacaoFisica(payload: AvaliacaoPayload) {
 
 export function submitAvaliacaoNutricional(payload: AvaliacaoNutricionalPayload) {
   return post('/avaliacao-nutricional', payload);
+}
+
+export async function getBanners(): Promise<BannerRecord[]> {
+  try {
+    const res = await fetch(`${API_URL}/banners`, { cache: 'no-store' });
+    if (!res.ok) return [];
+    const data = await res.json().catch(() => null);
+    return Array.isArray(data?.data) ? data.data : [];
+  } catch {
+    return [];
+  }
 }
