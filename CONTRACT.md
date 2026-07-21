@@ -223,6 +223,11 @@ reformatar, mascarar ou alterar esse valor em nenhuma etapa.
 - `POST /matricula`, `POST /cortesia`, `POST /avaliacao-fisica`, `POST /avaliacao-nutricional`,
   `GET /banners`: precisam aceitar requisições cross-origin do domínio do site (`Content-Type`
   como header permitido).
+- **A allowlist de origens precisa incluir também `http://localhost:3000`** (e, se possível,
+  `http://127.0.0.1:3000`), não só o domínio de produção — hoje quem desenvolve o frontend
+  localmente não consegue testar nenhum desses formulários (`matricula`, `cortesia`,
+  `avaliacao-fisica`, `avaliacao-nutricional`) porque o `npm run dev` local roda em
+  `localhost:3000` e é bloqueado pelo CORS.
 - `POST /admin/login`, `GET /matricula`, `GET /cortesia`, `GET /avaliacao-fisica`,
   `GET /avaliacao-nutricional`, `PATCH /cortesia/:id/presenca`, `GET /admin/banners`,
   `POST /admin/banners`, `PATCH /admin/banners/:id`, e todos os `DELETE /:recurso/:id`

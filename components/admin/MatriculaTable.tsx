@@ -5,6 +5,7 @@ import { deleteMatricula, type MatriculaRecord } from "@/lib/adminApi";
 import { buildMatriculaConfirmMessage, whatsappLinkForCustomer } from "@/lib/whatsappTemplates";
 import { useSoftDelete } from "@/lib/useSoftDelete";
 import MatriculaNumeroModal from "./MatriculaNumeroModal";
+import MatriculaDetalheModal from "./MatriculaDetalheModal";
 import ConfirmDialog from "./ConfirmDialog";
 import UndoToast from "./UndoToast";
 import DeleteButton from "./DeleteButton";
@@ -12,6 +13,7 @@ import DeleteButton from "./DeleteButton";
 export default function MatriculaTable({ records }: { records: MatriculaRecord[] }) {
   const [contatoAlvo, setContatoAlvo] = useState<MatriculaRecord | null>(null);
   const [confirmAlvo, setConfirmAlvo] = useState<MatriculaRecord | null>(null);
+  const [detalheAlvo, setDetalheAlvo] = useState<MatriculaRecord | null>(null);
   const { items, pending, requestDelete, undo, undoWindowMs, error, dismissError } = useSoftDelete(
     records,
     deleteMatricula,
@@ -37,13 +39,17 @@ export default function MatriculaTable({ records }: { records: MatriculaRecord[]
           </thead>
           <tbody>
             {items.map((r) => (
-              <tr key={r.id} className="border-t border-[var(--gray-light)]">
+              <tr
+                key={r.id}
+                onClick={() => setDetalheAlvo(r)}
+                className="cursor-pointer border-t border-[var(--gray-light)] transition-colors hover:bg-[var(--off-white)]"
+              >
                 <td className="px-4 py-3 font-semibold text-[var(--text)]">{r.nome}</td>
                 <td className="px-4 py-3">{r.whatsapp}</td>
                 <td className="px-4 py-3">{r.modalidade}</td>
                 <td className="px-4 py-3">{r.unidade}</td>
                 <td className="px-4 py-3">{r.plano}</td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-2">
                     <button
                       type="button"
@@ -74,6 +80,10 @@ export default function MatriculaTable({ records }: { records: MatriculaRecord[]
             setContatoAlvo(null);
           }}
         />
+      )}
+
+      {detalheAlvo && (
+        <MatriculaDetalheModal matricula={detalheAlvo} onClose={() => setDetalheAlvo(null)} />
       )}
 
       {confirmAlvo && (
