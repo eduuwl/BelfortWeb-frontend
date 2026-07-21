@@ -246,6 +246,13 @@ Resposta (`200`):
 { "data": [ { "id": "...", "imageUrl": "...", "ordem": 1, "ativo": true, "link": null, "alt": "...", "createdAt": "..." } ] }
 ```
 
+**Atenção — rate limit:** esse endpoint é chamado a cada carregamento da home (às vezes duas
+vezes: uma no servidor, uma no navegador, quando o retrato em cache do Next volta vazio e o
+frontend tenta buscar de novo), então recebe bem mais tráfego do que os outros endpoints públicos.
+Já observamos `429 ThrottlerException` em produção nele. Como é uma rota pública de leitura, sem
+custo de escrita, recomenda-se um limite bem mais alto (ou isenção do throttler) aqui do que em
+rotas sensíveis como `/admin/login`.
+
 ### `GET /admin/banners`
 
 Chamado apenas pelo Route Handler `app/api/admin/banners/route.ts` — **não precisa de CORS**.

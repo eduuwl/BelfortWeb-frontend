@@ -11,9 +11,12 @@ export default function HeroCarousel({ banners: initialBanners }: { banners: Ban
 
   // O Next.js reexibe a home a partir de um retrato congelado (RSC payload) quando o usuário volta
   // pelo histórico do navegador, sem buscar dados novos no servidor — isso não é configurável via
-  // staleTimes. Buscamos os banners de novo aqui no cliente pra nunca ficar preso num retrato
-  // desatualizado (ex.: um momento em que ainda não havia banners cadastrados).
+  // staleTimes. Só tentamos de novo aqui no cliente quando esse retrato veio sem nenhum banner
+  // (pra nunca ficar preso mostrando o fallback à toa); quando o servidor já mandou banners, não
+  // duplicamos a chamada — o backend tem um rate limit sensível em GET /banners.
   useEffect(() => {
+    if (initialBanners.length > 0) return;
+
     let active = true;
     getBanners().then((fresh) => {
       if (active && fresh.length > 0) {
@@ -24,7 +27,7 @@ export default function HeroCarousel({ banners: initialBanners }: { banners: Ban
     return () => {
       active = false;
     };
-  }, []);
+  }, [initialBanners]);
 
   useEffect(() => {
     if (banners.length < 2 || paused) return;
