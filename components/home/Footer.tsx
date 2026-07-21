@@ -7,7 +7,9 @@ export default function Footer() {
     <footer className="bg-[#080F1C] px-8 py-12">
       <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-6">
         <Image src="/images/logo.png" alt="Academia Belfort" width={1005} height={334} className="h-7 w-auto" />
-        <div className="text-[0.78rem] text-white/30">Academia Belfort © 2026 · Belém, PA</div>
+        <div className="text-[0.78rem] text-white/30">
+          Academia Belfort © 2026 · Belém, PA · CNPJ 18.353.376/0002-26
+        </div>
         <div className="flex flex-wrap gap-4">
           <a
             href="https://www.instagram.com/academiabelfort/"

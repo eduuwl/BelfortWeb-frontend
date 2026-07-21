@@ -27,6 +27,7 @@ function jsonLd() {
       name: "Academia Belfort",
       url: SITE_URL,
       image: `${SITE_URL}/images/logo.png`,
+      taxID: "18.353.376/0002-26",
       location: UNIDADES.map((u) => ({
         "@type": "Place",
         name: u.nome,
