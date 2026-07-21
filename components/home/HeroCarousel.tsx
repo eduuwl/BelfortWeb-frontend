@@ -1,12 +1,30 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { BannerRecord } from "@/lib/api";
+import { getBanners, type BannerRecord } from "@/lib/api";
 import Hero from "./Hero";
 
-export default function HeroCarousel({ banners }: { banners: BannerRecord[] }) {
+export default function HeroCarousel({ banners: initialBanners }: { banners: BannerRecord[] }) {
+  const [banners, setBanners] = useState(initialBanners);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+
+  // O Next.js reexibe a home a partir de um retrato congelado (RSC payload) quando o usuário volta
+  // pelo histórico do navegador, sem buscar dados novos no servidor — isso não é configurável via
+  // staleTimes. Buscamos os banners de novo aqui no cliente pra nunca ficar preso num retrato
+  // desatualizado (ex.: um momento em que ainda não havia banners cadastrados).
+  useEffect(() => {
+    let active = true;
+    getBanners().then((fresh) => {
+      if (active && fresh.length > 0) {
+        setBanners(fresh);
+        setIndex(0);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (banners.length < 2 || paused) return;
