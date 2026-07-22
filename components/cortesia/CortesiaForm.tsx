@@ -151,7 +151,14 @@ export default function CortesiaForm() {
   const diasStr = form.modalidade === "cross" ? diasConsecutivos.join(", ") : (form.dia ?? "");
   const horarioLabel = horarioSelecionado?.label ?? form.horario ?? "";
   const diasParaData = form.modalidade === "cross" ? diasConsecutivos : form.dia ? [form.dia] : [];
-  const datasAula = proximasDatas(diasParaData).join(", ");
+  const datasArray = proximasDatas(diasParaData);
+  const datasAula = datasArray.join(", ");
+  const diasComDatas =
+    form.modalidade === "cross"
+      ? diasConsecutivos.map((d, i) => `${d} (${datasArray[i]})`).join(" · ")
+      : form.dia && datasArray[0]
+        ? `${form.dia} (${datasArray[0]})`
+        : diasStr;
 
   function selectDia(d: string) {
     update("dia", d);
@@ -197,7 +204,7 @@ export default function CortesiaForm() {
   const whatsMsg = encodeURIComponent(
     `Olá! Acabei de agendar minha aula de cortesia de ${modalidadeLabel(
       form.modalidade,
-    )} na Academia Belfort para ${diasStr} às ${horarioLabel}. Nome: ${form.nome.trim()}`,
+    )} na Academia Belfort para ${diasComDatas} às ${horarioLabel}. Nome: ${form.nome.trim()}`,
   );
 
   return (
@@ -378,7 +385,7 @@ export default function CortesiaForm() {
                 <ResumoItem label="E-mail" value={form.email.trim()} />
                 <ResumoItem label="CPF" value={form.cpf} />
                 <ResumoItem label="Horário" value={horarioLabel} />
-                <ResumoItem label="Dia(s)" value={diasStr} />
+                <ResumoItem label="Dia(s)" value={diasComDatas} />
                 {form.limitacao && (
                   <ResumoItem label="Limitação" value={<span className="text-[var(--red)]">{form.limitacaoDesc || "Sim"}</span>} />
                 )}
@@ -407,13 +414,13 @@ export default function CortesiaForm() {
                     <p className="mb-1 text-[0.82rem] text-[var(--gray)]">
                       {crossSomenteSabado ? "Seu dia de treino:" : "Seus 3 dias de treino:"}
                     </p>
-                    <strong className="text-[0.95rem] text-[var(--blue)]">{diasConsecutivos.join(" · ")}</strong>
+                    <strong className="text-[0.95rem] text-[var(--blue)]">{diasComDatas}</strong>
                     <br />
                     <span className="text-[0.8rem] text-[var(--gray)]">Horário: {horarioLabel}</span>
                   </>
                 ) : (
                   <p className="text-[0.82rem] text-[var(--gray)]">
-                    Data e horário: <strong className="text-[0.95rem] text-[var(--blue)]">{form.dia} às {horarioLabel}</strong>
+                    Data e horário: <strong className="text-[0.95rem] text-[var(--blue)]">{diasComDatas} às {horarioLabel}</strong>
                   </p>
                 )}
               </div>

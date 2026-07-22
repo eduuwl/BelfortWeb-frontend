@@ -58,7 +58,9 @@ export default function CortesiaTable({ records }: { records: CortesiaRecord[] }
                 <td className="px-4 py-3 font-semibold text-[var(--text)]">{r.nome}</td>
                 <td className="px-4 py-3">{r.whatsapp}</td>
                 <td className="px-4 py-3">{r.modalidade}</td>
-                <td className="px-4 py-3">{r.dia}</td>
+                <td className="px-4 py-3">
+                  {r.dia} ({r.datasAula})
+                </td>
                 <td className="px-4 py-3">{r.horario}</td>
                 <td className="px-4 py-3">
                   {r.presencaConfirmada ? (
