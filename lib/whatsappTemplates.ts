@@ -72,8 +72,47 @@ Com essas orientações, garantimos uma avaliação mais precisa e um planejamen
 Agora é só seguir as recomendações e arrasar! 🚀`;
 }
 
-// Placeholder — ainda não existe um template real de confirmação para cortesia (confirmado com o
-// cliente). Usar só até um texto definitivo ser definido.
+export interface CortesiaTemplateData {
+  nome: string;
+  modalidade: string;
+  /** Pode ser um único dia ("Sexta") ou vários separados por vírgula ("Segunda, Terça, Quarta"). */
+  dia: string;
+  /** Mesma cardinalidade de `dia`, no formato dd/mm/aaaa, separadas por vírgula. */
+  datasAula: string;
+  horario: string;
+}
+
+function diaComFeiraECortesia(diaSemana: string): string {
+  return diaSemana === "Sábado" || diaSemana === "Domingo" ? diaSemana : `${diaSemana}-feira`;
+}
+
+function diasEDatasFormatados(dia: string, datasAula: string): string {
+  const dias = dia.split(",").map((d) => d.trim());
+  const datas = datasAula.split(",").map((d) => d.trim());
+  return dias.map((d, i) => `${diaComFeiraECortesia(d)} dia ${datas[i] ?? ""}`).join(", ");
+}
+
+export function buildCortesiaConfirmMessage({ nome, modalidade, dia, datasAula, horario }: CortesiaTemplateData): string {
+  return `NOME: *${nome}*
+
+*Sua aula de cortesia de ${modalidade} foi confirmada!* 🎉
+
+📅 ${diasEDatasFormatados(dia, datasAula)}
+🕐 Horário: *${horario}*
+
+📍 *Orientações para o seu dia*:
+
+Chegue com uns 10 minutinhos de antecedência pra gente te receber com calma.
+
+Vista roupas confortáveis e traga uma garrafinha de água.
+
+⚠️ Tolerância de até *10 minutos* de atraso — depois desse tempo, sua vaga pode ser perdida.
+
+Qualquer imprevisto, nos avise por aqui mesmo! 💪
+
+_Estamos ansiosos pra te receber na Belfort!_`;
+}
+
 export function buildGenericContatoMessage(nome: string): string {
   return `Olá ${nome}, tudo bem? Aqui é da Academia Belfort! 😊`;
 }

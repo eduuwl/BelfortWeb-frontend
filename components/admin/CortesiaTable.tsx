@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { confirmarPresencaCortesia, deleteCortesia, type CortesiaRecord } from "@/lib/adminApi";
-import { buildGenericContatoMessage, whatsappLinkForCustomer } from "@/lib/whatsappTemplates";
+import { buildCortesiaConfirmMessage, whatsappLinkForCustomer } from "@/lib/whatsappTemplates";
 import { useSoftDelete } from "@/lib/useSoftDelete";
 import ConfirmDialog from "./ConfirmDialog";
 import UndoToast from "./UndoToast";
@@ -94,7 +94,16 @@ export default function CortesiaTable({ records }: { records: CortesiaRecord[] }
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-2">
                     <a
-                      href={whatsappLinkForCustomer(r.whatsapp, buildGenericContatoMessage(r.nome))}
+                      href={whatsappLinkForCustomer(
+                        r.whatsapp,
+                        buildCortesiaConfirmMessage({
+                          nome: r.nome,
+                          modalidade: r.modalidade,
+                          dia: r.dia,
+                          datasAula: r.datasAula,
+                          horario: r.horario,
+                        }),
+                      )}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-block rounded-lg bg-[#25D366] px-3 py-1.5 text-[0.78rem] font-semibold text-white transition-colors hover:bg-[#1da851]"

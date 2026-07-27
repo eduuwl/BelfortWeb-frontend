@@ -142,19 +142,25 @@ export function HorarioButton({
   label,
   selected,
   onClick,
+  disabled,
 }: {
   label: string;
   selected: boolean;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      title={disabled ? "Esse horário já passou hoje" : undefined}
       className={`rounded-lg border-[1.5px] py-2.5 text-[0.82rem] font-semibold transition-all active:scale-95 ${
-        selected
-          ? "-translate-y-0.5 border-[var(--red)] bg-[var(--red)] text-white shadow-[0_8px_20px_rgba(204,55,56,0.3)]"
-          : "border-[var(--gray-light)] bg-white text-[var(--text)] hover:border-[var(--red)] hover:text-[var(--red)]"
+        disabled
+          ? "cursor-not-allowed border-[var(--gray-light)] bg-[var(--off-white)] text-[var(--gray)] opacity-50 line-through"
+          : selected
+            ? "-translate-y-0.5 border-[var(--red)] bg-[var(--red)] text-white shadow-[0_8px_20px_rgba(204,55,56,0.3)]"
+            : "border-[var(--gray-light)] bg-white text-[var(--text)] hover:border-[var(--red)] hover:text-[var(--red)]"
       }`}
     >
       {label}
@@ -167,20 +173,26 @@ export function DiaButton({
   sub,
   selected,
   onClick,
+  disabled,
 }: {
   label: string;
   sub?: string;
   selected: boolean;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      title={disabled ? "O horário escolhido já passou hoje" : undefined}
       className={`rounded-lg border-[1.5px] px-2 py-2.5 text-center text-[0.82rem] font-semibold transition-all active:scale-95 ${
-        selected
-          ? "-translate-y-0.5 border-[var(--red)] bg-[var(--red)] text-white shadow-[0_8px_20px_rgba(204,55,56,0.3)]"
-          : "border-[var(--gray-light)] bg-white text-[var(--text)] hover:border-[var(--red)] hover:text-[var(--red)]"
+        disabled
+          ? "cursor-not-allowed border-[var(--gray-light)] bg-[var(--off-white)] text-[var(--gray)] opacity-50 line-through"
+          : selected
+            ? "-translate-y-0.5 border-[var(--red)] bg-[var(--red)] text-white shadow-[0_8px_20px_rgba(204,55,56,0.3)]"
+            : "border-[var(--gray-light)] bg-white text-[var(--text)] hover:border-[var(--red)] hover:text-[var(--red)]"
       }`}
     >
       {label}

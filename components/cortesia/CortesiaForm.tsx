@@ -38,7 +38,7 @@ import {
   HORARIOS_KIDS,
   HORARIOS_MUSC,
 } from "@/lib/horarios";
-import { proximasDatas } from "@/lib/dateUtils";
+import { ehHoje, horarioJaPassouHoje, proximaData, proximasDatas } from "@/lib/dateUtils";
 import { submitCortesia } from "@/lib/api";
 import { clearFormPersistence, useFormPersistence } from "@/lib/useFormPersistence";
 import { trackEvent } from "@/lib/analytics";
@@ -159,6 +159,12 @@ export default function CortesiaForm() {
       : form.dia && datasArray[0]
         ? `${form.dia} (${datasArray[0]})`
         : diasStr;
+
+  // O horário já foi escolhido no passo anterior — se o dia candidato cair em hoje e esse
+  // horário já tiver passado, não faz sentido deixar marcar "hoje".
+  function diaEstaDesabilitado(d: string): boolean {
+    return ehHoje(proximaData(d)) && form.horario !== null && horarioJaPassouHoje(form.horario);
+  }
 
   function selectDia(d: string) {
     update("dia", d);
@@ -344,7 +350,12 @@ export default function CortesiaForm() {
 
               <div className="mb-5 grid grid-cols-3 gap-2">
                 {crossSomenteSabado ? (
-                  <DiaButton label="Sábado" selected={form.dia === "Sábado"} onClick={() => selectDia("Sábado")} />
+                  <DiaButton
+                    label="Sábado"
+                    selected={form.dia === "Sábado"}
+                    onClick={() => selectDia("Sábado")}
+                    disabled={diaEstaDesabilitado("Sábado")}
+                  />
                 ) : form.modalidade === "cross" ? (
                   Object.keys(DIAS_CONSECUTIVOS).map((d) => (
                     <DiaButton
@@ -353,15 +364,28 @@ export default function CortesiaForm() {
                       sub={DIAS_CONSECUTIVOS[d].join(" · ")}
                       selected={form.dia === d}
                       onClick={() => selectDia(d)}
+                      disabled={diaEstaDesabilitado(d)}
                     />
                   ))
                 ) : form.modalidade === "kids" ? (
                   DIAS_KIDS.map((d) => (
-                    <DiaButton key={d} label={d} selected={form.dia === d} onClick={() => selectDia(d)} />
+                    <DiaButton
+                      key={d}
+                      label={d}
+                      selected={form.dia === d}
+                      onClick={() => selectDia(d)}
+                      disabled={diaEstaDesabilitado(d)}
+                    />
                   ))
                 ) : (
                   DIAS_SEMANA.filter((d) => d !== "Sábado" || horarioValidoNoSabado(form.horario)).map((d) => (
-                    <DiaButton key={d} label={d} selected={form.dia === d} onClick={() => selectDia(d)} />
+                    <DiaButton
+                      key={d}
+                      label={d}
+                      selected={form.dia === d}
+                      onClick={() => selectDia(d)}
+                      disabled={diaEstaDesabilitado(d)}
+                    />
                   ))
                 )}
               </div>

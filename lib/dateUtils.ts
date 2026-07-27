@@ -12,15 +12,32 @@ export function formatarDataBr(data: Date): string {
   return data.toLocaleDateString('pt-BR', { timeZone: 'America/Belem' });
 }
 
-/** Próxima data (estritamente depois de hoje) que cai no dia da semana informado. */
+/** Próxima data que cai no dia da semana informado — inclui hoje, se hoje já for esse dia. */
 export function proximaData(diaSemana: string, hoje = new Date()): Date {
   const alvo = DIAS_SEMANA_INDEX[diaSemana];
   const data = new Date(hoje);
   data.setHours(0, 0, 0, 0);
-  do {
+  while (data.getDay() !== alvo) {
     data.setDate(data.getDate() + 1);
-  } while (data.getDay() !== alvo);
+  }
   return data;
+}
+
+/** true se `data` cai no mesmo dia (ano/mês/dia) que `agora`. */
+export function ehHoje(data: Date, agora = new Date()): boolean {
+  return (
+    data.getFullYear() === agora.getFullYear() &&
+    data.getMonth() === agora.getMonth() &&
+    data.getDate() === agora.getDate()
+  );
+}
+
+/** true se o horário `HH:MM` informado já passou hoje, comparado ao horário atual. */
+export function horarioJaPassouHoje(horario: string, agora = new Date()): boolean {
+  const [h, m] = horario.split(':').map(Number);
+  const alvo = new Date(agora);
+  alvo.setHours(h, m, 0, 0);
+  return agora.getTime() > alvo.getTime();
 }
 
 /**

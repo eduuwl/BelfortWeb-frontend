@@ -33,7 +33,7 @@ import {
 } from "@/components/form/FormShell";
 import { maskPhone } from "@/lib/validators";
 import { DIAS_AVALIACAO, HORARIOS_AVALIACAO_MANHA, HORARIOS_AVALIACAO_TARDE } from "@/lib/horarios";
-import { proximaData, formatarDataBr } from "@/lib/dateUtils";
+import { ehHoje, formatarDataBr, horarioJaPassouHoje, proximaData } from "@/lib/dateUtils";
 import { submitAvaliacaoNutricional } from "@/lib/api";
 import { clearFormPersistence, useFormPersistence } from "@/lib/useFormPersistence";
 import { trackEvent } from "@/lib/analytics";
@@ -110,6 +110,7 @@ export default function AvaliacaoNutricionalForm() {
   const step4Ok = form.horario !== null;
 
   const dataAvaliacao = form.dia ? formatarDataBr(proximaData(form.dia)) : "";
+  const diaEhHoje = form.dia !== null && ehHoje(proximaData(form.dia));
 
   async function handleSubmit() {
     if (!form.unidade || !form.dia || !form.horario) return;
@@ -244,14 +245,26 @@ export default function AvaliacaoNutricionalForm() {
               <FieldLabel>Manhã</FieldLabel>
               <HorarioGrid>
                 {HORARIOS_AVALIACAO_MANHA.map((h) => (
-                  <HorarioButton key={h.value} label={h.label} selected={form.horario === h.value} onClick={() => update("horario", h.value)} />
+                  <HorarioButton
+                    key={h.value}
+                    label={h.label}
+                    selected={form.horario === h.value}
+                    onClick={() => update("horario", h.value)}
+                    disabled={diaEhHoje && horarioJaPassouHoje(h.value)}
+                  />
                 ))}
               </HorarioGrid>
 
               <FieldLabel>Tarde</FieldLabel>
               <HorarioGrid>
                 {HORARIOS_AVALIACAO_TARDE.map((h) => (
-                  <HorarioButton key={h.value} label={h.label} selected={form.horario === h.value} onClick={() => update("horario", h.value)} />
+                  <HorarioButton
+                    key={h.value}
+                    label={h.label}
+                    selected={form.horario === h.value}
+                    onClick={() => update("horario", h.value)}
+                    disabled={diaEhHoje && horarioJaPassouHoje(h.value)}
+                  />
                 ))}
               </HorarioGrid>
 

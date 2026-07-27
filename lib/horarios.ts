@@ -15,9 +15,10 @@ export function gerarSlots(inicioHora: number, fimHora: number, passoMinutos: nu
   return slots;
 }
 
-// Musculação tem horário livre das 6h às 22h (seg a sex). Aos sábados a academia fecha às
-// 16h — ver horarioValidoNoSabado no CortesiaForm, que filtra o dia "Sábado" de acordo.
-export const HORARIOS_MUSC: HorarioSlot[] = gerarSlots(6, 22, 30);
+// Musculação tem horário livre das 6h às 21h (seg a sex) — a academia fecha às 22h, então não
+// oferecemos 21:30/22:00 como horário de entrada. Aos sábados a academia fecha às 16h — ver
+// horarioValidoNoSabado no CortesiaForm, que filtra o dia "Sábado" de acordo.
+export const HORARIOS_MUSC: HorarioSlot[] = gerarSlots(6, 21, 30);
 
 // Cross Training tem aulas em horários fixos. A de 10h só acontece aos sábados.
 export const HORARIOS_CROSS: HorarioSlot[] = [
