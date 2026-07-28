@@ -44,11 +44,11 @@ export const HORARIOS_AVALIACAO_TARDE: HorarioSlot[] = gerarSlots(17, 20.5, 30);
 
 export const DIAS_AVALIACAO = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
 
-// Avaliação Física: horários fixos de manhã e noite. Sem atendimento às quartas.
+// Avaliação Física: horários fixos de manhã e noite.
 export const HORARIOS_AVALIACAO_FISICA_MANHA: HorarioSlot[] = gerarSlots(7, 9.5, 30);
 export const HORARIOS_AVALIACAO_FISICA_NOITE: HorarioSlot[] = gerarSlots(18, 20.5, 30);
 
-export const DIAS_AVALIACAO_FISICA = ['Segunda', 'Terça', 'Quinta', 'Sexta'];
+export const DIAS_AVALIACAO_FISICA = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
 
 export const DIAS_CONSECUTIVOS: Record<string, string[]> = {
   Segunda: ['Segunda', 'Terça', 'Quarta'],

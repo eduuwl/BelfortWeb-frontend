@@ -222,7 +222,7 @@ export default function AvaliacaoForm() {
             <div className={stepAnim}>
               <BtnBack onClick={() => goTo(2)} />
               <StepTitle>Escolha o dia</StepTitle>
-              <StepDesc>Atendemos avaliação física segunda, terça, quinta e sexta.</StepDesc>
+              <StepDesc>Atendemos avaliação física de segunda a sexta.</StepDesc>
 
               <div className="mb-5 grid grid-cols-3 gap-2">
                 {DIAS_AVALIACAO_FISICA.map((d) => (
