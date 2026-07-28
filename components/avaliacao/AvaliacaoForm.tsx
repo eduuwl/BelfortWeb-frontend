@@ -32,7 +32,7 @@ import {
   SuccessTitle,
 } from "@/components/form/FormShell";
 import { maskPhone } from "@/lib/validators";
-import { DIAS_AVALIACAO, HORARIOS_AVALIACAO_MANHA, HORARIOS_AVALIACAO_TARDE } from "@/lib/horarios";
+import { DIAS_AVALIACAO_FISICA, HORARIOS_AVALIACAO_FISICA_MANHA, HORARIOS_AVALIACAO_FISICA_NOITE } from "@/lib/horarios";
 import { ehHoje, formatarDataBr, horarioJaPassouHoje, proximaData } from "@/lib/dateUtils";
 import { submitAvaliacaoFisica } from "@/lib/api";
 import { clearFormPersistence, useFormPersistence } from "@/lib/useFormPersistence";
@@ -222,10 +222,10 @@ export default function AvaliacaoForm() {
             <div className={stepAnim}>
               <BtnBack onClick={() => goTo(2)} />
               <StepTitle>Escolha o dia</StepTitle>
-              <StepDesc>Atendemos avaliação física de segunda a sexta.</StepDesc>
+              <StepDesc>Atendemos avaliação física segunda, terça, quinta e sexta.</StepDesc>
 
               <div className="mb-5 grid grid-cols-3 gap-2">
-                {DIAS_AVALIACAO.map((d) => (
+                {DIAS_AVALIACAO_FISICA.map((d) => (
                   <DiaButton key={d} label={d} selected={form.dia === d} onClick={() => update("dia", d)} />
                 ))}
               </div>
@@ -240,11 +240,11 @@ export default function AvaliacaoForm() {
             <div className={stepAnim}>
               <BtnBack onClick={() => goTo(3)} />
               <StepTitle>Escolha o horário</StepTitle>
-              <StepDesc>Horários fixos de manhã e tarde.</StepDesc>
+              <StepDesc>Horários fixos de manhã e noite.</StepDesc>
 
               <FieldLabel>Manhã</FieldLabel>
               <HorarioGrid>
-                {HORARIOS_AVALIACAO_MANHA.map((h) => (
+                {HORARIOS_AVALIACAO_FISICA_MANHA.map((h) => (
                   <HorarioButton
                     key={h.value}
                     label={h.label}
@@ -255,9 +255,9 @@ export default function AvaliacaoForm() {
                 ))}
               </HorarioGrid>
 
-              <FieldLabel>Tarde</FieldLabel>
+              <FieldLabel>Noite</FieldLabel>
               <HorarioGrid>
-                {HORARIOS_AVALIACAO_TARDE.map((h) => (
+                {HORARIOS_AVALIACAO_FISICA_NOITE.map((h) => (
                   <HorarioButton
                     key={h.value}
                     label={h.label}
