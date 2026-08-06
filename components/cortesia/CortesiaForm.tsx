@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BoltIcon, ExclamationTriangleIcon, FaceSmileIcon, FireIcon } from "@heroicons/react/24/solid";
+import { BoltIcon, ExclamationTriangleIcon, FaceSmileIcon, FireIcon, MapPinIcon } from "@heroicons/react/24/solid";
 import StepsIndicator from "@/components/form/StepsIndicator";
 import FormNav from "@/components/form/FormNav";
 import {
@@ -10,6 +10,7 @@ import {
   BtnWhatsapp,
   DiaButton,
   FieldInput,
+  FieldLabel,
   HorarioButton,
   HorarioGrid,
   LoadingOverlay,
@@ -31,18 +32,17 @@ import {
 } from "@/components/form/FormShell";
 import { cpfValido, isValidEmail, maskCPF, maskPhone } from "@/lib/validators";
 import {
-  DIAS_CONSECUTIVOS,
-  DIAS_KIDS,
-  DIAS_SEMANA,
-  HORARIOS_CROSS,
-  HORARIOS_KIDS,
-  HORARIOS_MUSC,
-} from "@/lib/horarios";
-import { ehHoje, horarioJaPassouHoje, proximaData, proximasDatas } from "@/lib/dateUtils";
+  deriveCortesiaAgendamento,
+  diaEstaDesabilitado,
+  diasOpcoesParaModalidade,
+  horarioValidoNoSabado,
+  modalidadeLabel,
+  unidadeLabel,
+} from "@/lib/cortesiaLogic";
 import { submitCortesia } from "@/lib/api";
 import { clearFormPersistence, useFormPersistence } from "@/lib/useFormPersistence";
 import { trackEvent } from "@/lib/analytics";
-import type { Modalidade } from "@/lib/planos";
+import type { Modalidade, Unidade } from "@/lib/planos";
 
 const STORAGE_KEY = "belfort:cortesia";
 
@@ -50,6 +50,7 @@ type Step = 1 | 2 | 3 | 4 | 5 | "sucesso";
 
 interface FormState {
   modalidade: Modalidade | null;
+  unidade: Unidade | null;
   nome: string;
   whatsapp: string;
   email: string;
@@ -62,6 +63,7 @@ interface FormState {
 
 const INITIAL_STATE: FormState = {
   modalidade: null,
+  unidade: null,
   nome: "",
   whatsapp: "",
   email: "",
@@ -73,18 +75,6 @@ const INITIAL_STATE: FormState = {
 };
 
 const WHATSAPP_NUMERO = "5591984862479";
-
-function modalidadeLabel(m: Modalidade | null): string {
-  if (m === "musculacao") return "Musculação";
-  if (m === "cross") return "Cross Training";
-  if (m === "kids") return "Funcional Kids";
-  return "";
-}
-
-// Aos sábados a academia funciona só das 8h às 16h.
-function horarioValidoNoSabado(horario: string | null): boolean {
-  return horario !== null && horario >= "08:00" && horario <= "16:00";
-}
 
 export default function CortesiaForm() {
   const [step, setStep] = useState<Step>(1);
@@ -125,7 +115,7 @@ export default function CortesiaForm() {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  const step1Ok = form.modalidade !== null;
+  const step1Ok = form.modalidade !== null && (form.modalidade !== "musculacao" || form.unidade !== null);
 
   const step2Ok =
     form.nome.trim().length >= 3 &&
@@ -135,43 +125,32 @@ export default function CortesiaForm() {
     cpfValido(form.cpf) &&
     form.limitacao !== null;
 
-  const horarios =
-    form.modalidade === "musculacao" ? HORARIOS_MUSC : form.modalidade === "kids" ? HORARIOS_KIDS : HORARIOS_CROSS;
-  const horarioSelecionado = horarios.find((h) => h.value === form.horario);
-  const crossSomenteSabado = form.modalidade === "cross" && horarioSelecionado?.somenteSabado === true;
   const step3Ok = form.horario !== null;
   const step4Ok = form.dia !== null;
 
-  const diasConsecutivos =
-    form.modalidade === "cross" && form.dia
-      ? crossSomenteSabado
-        ? [form.dia]
-        : DIAS_CONSECUTIVOS[form.dia] ?? []
-      : [];
-  const diasStr = form.modalidade === "cross" ? diasConsecutivos.join(", ") : (form.dia ?? "");
-  const horarioLabel = horarioSelecionado?.label ?? form.horario ?? "";
-  const diasParaData = form.modalidade === "cross" ? diasConsecutivos : form.dia ? [form.dia] : [];
-  const datasArray = proximasDatas(diasParaData);
-  const datasAula = datasArray.join(", ");
-  const diasComDatas =
-    form.modalidade === "cross"
-      ? diasConsecutivos.map((d, i) => `${d} (${datasArray[i]})`).join(" · ")
-      : form.dia && datasArray[0]
-        ? `${form.dia} (${datasArray[0]})`
-        : diasStr;
+  const { horarios, crossSomenteSabado, diasStr, horarioLabel, datasAula, diasComDatas } =
+    deriveCortesiaAgendamento(form.modalidade, form.horario, form.dia);
 
-  // O horário já foi escolhido no passo anterior — se o dia candidato cair em hoje e esse
-  // horário já tiver passado, não faz sentido deixar marcar "hoje".
-  function diaEstaDesabilitado(d: string): boolean {
-    return ehHoje(proximaData(d)) && form.horario !== null && horarioJaPassouHoje(form.horario);
-  }
+  const diasOpcoes = diasOpcoesParaModalidade(form.modalidade, crossSomenteSabado, form.horario);
 
   function selectDia(d: string) {
     update("dia", d);
   }
 
   function selectModalidade(m: Modalidade) {
-    setForm((f) => ({ ...f, modalidade: m, horario: null, dia: null }));
+    setForm((f) => ({
+      ...f,
+      modalidade: m,
+      // Cross Training e Funcional Kids só existem na unidade Telégrafo — a musculação é a
+      // única modalidade em que a pessoa realmente escolhe a unidade.
+      unidade: m === "musculacao" ? f.unidade : "telegrafo",
+      horario: null,
+      dia: null,
+    }));
+  }
+
+  function selectUnidade(u: Unidade) {
+    update("unidade", u);
   }
 
   function selectHorario(v: string) {
@@ -189,6 +168,7 @@ export default function CortesiaForm() {
       email: form.email.trim(),
       cpf: form.cpf.trim(),
       modalidade: modalidadeLabel(form.modalidade),
+      unidade: unidadeLabel(form.unidade),
       horario: horarioLabel,
       dia: diasStr,
       datasAula,
@@ -210,7 +190,7 @@ export default function CortesiaForm() {
   const whatsMsg = encodeURIComponent(
     `Olá! Acabei de agendar minha aula de cortesia de ${modalidadeLabel(
       form.modalidade,
-    )} na Academia Belfort para ${diasComDatas} às ${horarioLabel}. Nome: ${form.nome.trim()}`,
+    )} na Academia Belfort (unidade ${unidadeLabel(form.unidade)}) para ${diasComDatas} às ${horarioLabel}. Nome: ${form.nome.trim()}`,
   );
 
   return (
@@ -255,6 +235,16 @@ export default function CortesiaForm() {
                 <OptionButton icon={BoltIcon} label="Cross Training" selected={form.modalidade === "cross"} onClick={() => selectModalidade("cross")} />
                 <OptionButton icon={FaceSmileIcon} label="Funcional Kids" selected={form.modalidade === "kids"} onClick={() => selectModalidade("kids")} />
               </OptionGrid>
+
+              {form.modalidade === "musculacao" && (
+                <>
+                  <FieldLabel>Unidade</FieldLabel>
+                  <OptionGrid>
+                    <OptionButton icon={MapPinIcon} label="Telégrafo" selected={form.unidade === "telegrafo"} onClick={() => selectUnidade("telegrafo")} />
+                    <OptionButton icon={MapPinIcon} label="Sacramenta" selected={form.unidade === "sacramenta"} onClick={() => selectUnidade("sacramenta")} />
+                  </OptionGrid>
+                </>
+              )}
 
               <BtnPrimary disabled={!step1Ok} onClick={() => goTo(2)}>
                 Continuar
@@ -349,45 +339,16 @@ export default function CortesiaForm() {
               </StepDesc>
 
               <div className="mb-5 grid grid-cols-3 gap-2">
-                {crossSomenteSabado ? (
+                {diasOpcoes.map((d) => (
                   <DiaButton
-                    label="Sábado"
-                    selected={form.dia === "Sábado"}
-                    onClick={() => selectDia("Sábado")}
-                    disabled={diaEstaDesabilitado("Sábado")}
+                    key={d.label}
+                    label={d.label}
+                    sub={d.sub}
+                    selected={form.dia === d.label}
+                    onClick={() => selectDia(d.label)}
+                    disabled={diaEstaDesabilitado(d.label, form.horario)}
                   />
-                ) : form.modalidade === "cross" ? (
-                  Object.keys(DIAS_CONSECUTIVOS).map((d) => (
-                    <DiaButton
-                      key={d}
-                      label={d}
-                      sub={DIAS_CONSECUTIVOS[d].join(" · ")}
-                      selected={form.dia === d}
-                      onClick={() => selectDia(d)}
-                      disabled={diaEstaDesabilitado(d)}
-                    />
-                  ))
-                ) : form.modalidade === "kids" ? (
-                  DIAS_KIDS.map((d) => (
-                    <DiaButton
-                      key={d}
-                      label={d}
-                      selected={form.dia === d}
-                      onClick={() => selectDia(d)}
-                      disabled={diaEstaDesabilitado(d)}
-                    />
-                  ))
-                ) : (
-                  DIAS_SEMANA.filter((d) => d !== "Sábado" || horarioValidoNoSabado(form.horario)).map((d) => (
-                    <DiaButton
-                      key={d}
-                      label={d}
-                      selected={form.dia === d}
-                      onClick={() => selectDia(d)}
-                      disabled={diaEstaDesabilitado(d)}
-                    />
-                  ))
-                )}
+                ))}
               </div>
 
               <BtnPrimary disabled={!step4Ok} onClick={() => goTo(5)}>
@@ -404,6 +365,7 @@ export default function CortesiaForm() {
 
               <div className="mb-6">
                 <ResumoItem label="Modalidade" value={modalidadeLabel(form.modalidade)} />
+                <ResumoItem label="Unidade" value={unidadeLabel(form.unidade)} />
                 <ResumoItem label="Nome" value={form.nome.trim()} />
                 <ResumoItem label="WhatsApp" value={form.whatsapp} />
                 <ResumoItem label="E-mail" value={form.email.trim()} />
@@ -441,10 +403,14 @@ export default function CortesiaForm() {
                     <strong className="text-[0.95rem] text-[var(--blue)]">{diasComDatas}</strong>
                     <br />
                     <span className="text-[0.8rem] text-[var(--gray)]">Horário: {horarioLabel}</span>
+                    <br />
+                    <span className="text-[0.8rem] text-[var(--gray)]">Unidade: {unidadeLabel(form.unidade)}</span>
                   </>
                 ) : (
                   <p className="text-[0.82rem] text-[var(--gray)]">
                     Data e horário: <strong className="text-[0.95rem] text-[var(--blue)]">{diasComDatas} às {horarioLabel}</strong>
+                    <br />
+                    Unidade: <strong className="text-[0.95rem] text-[var(--blue)]">{unidadeLabel(form.unidade)}</strong>
                   </p>
                 )}
               </div>

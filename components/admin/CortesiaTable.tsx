@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { confirmarPresencaCortesia, deleteCortesia, type CortesiaRecord } from "@/lib/adminApi";
+import { confirmarPresencaCortesia, deleteCortesia, salvarObservacao, type CortesiaRecord } from "@/lib/adminApi";
 import { buildCortesiaConfirmMessage, whatsappLinkForCustomer } from "@/lib/whatsappTemplates";
 import { useSoftDelete } from "@/lib/useSoftDelete";
 import ConfirmDialog from "./ConfirmDialog";
+import DetalheModal from "./DetalheModal";
 import UndoToast from "./UndoToast";
 import DeleteButton from "./DeleteButton";
 
@@ -12,6 +13,7 @@ export default function CortesiaTable({ records }: { records: CortesiaRecord[] }
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [errorId, setErrorId] = useState<{ id: string; message: string } | null>(null);
   const [confirmAlvo, setConfirmAlvo] = useState<CortesiaRecord | null>(null);
+  const [detalheAlvo, setDetalheAlvo] = useState<CortesiaRecord | null>(null);
   const { items, setItems, pending, requestDelete, undo, undoWindowMs, error, dismissError } = useSoftDelete(
     records,
     deleteCortesia,
@@ -46,6 +48,7 @@ export default function CortesiaTable({ records }: { records: CortesiaRecord[] }
               <th className="px-4 py-3">Nome</th>
               <th className="px-4 py-3">WhatsApp</th>
               <th className="px-4 py-3">Modalidade</th>
+              <th className="px-4 py-3">Unidade</th>
               <th className="px-4 py-3">Dia</th>
               <th className="px-4 py-3">Horário</th>
               <th className="px-4 py-3">Presença</th>
@@ -54,15 +57,20 @@ export default function CortesiaTable({ records }: { records: CortesiaRecord[] }
           </thead>
           <tbody>
             {items.map((r) => (
-              <tr key={r.id} className="border-t border-[var(--gray-light)]">
+              <tr
+                key={r.id}
+                onClick={() => setDetalheAlvo(r)}
+                className="cursor-pointer border-t border-[var(--gray-light)] transition-colors hover:bg-[var(--off-white)]"
+              >
                 <td className="px-4 py-3 font-semibold text-[var(--text)]">{r.nome}</td>
                 <td className="px-4 py-3">{r.whatsapp}</td>
                 <td className="px-4 py-3">{r.modalidade}</td>
+                <td className="px-4 py-3">{r.unidade}</td>
                 <td className="px-4 py-3">
                   {r.dia} ({r.datasAula})
                 </td>
                 <td className="px-4 py-3">{r.horario}</td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                   {r.presencaConfirmada ? (
                     <div className="flex items-center gap-2">
                       <span className="rounded-full bg-[#F0FDF4] px-2.5 py-1 text-[0.72rem] font-semibold text-[#166534]">
@@ -91,7 +99,7 @@ export default function CortesiaTable({ records }: { records: CortesiaRecord[] }
                     <p className="mt-1 text-[0.72rem] text-[var(--red)]">{errorId.message}</p>
                   )}
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-2">
                     <a
                       href={whatsappLinkForCustomer(
@@ -99,6 +107,7 @@ export default function CortesiaTable({ records }: { records: CortesiaRecord[] }
                         buildCortesiaConfirmMessage({
                           nome: r.nome,
                           modalidade: r.modalidade,
+                          unidade: r.unidade,
                           dia: r.dia,
                           datasAula: r.datasAula,
                           horario: r.horario,
@@ -118,6 +127,36 @@ export default function CortesiaTable({ records }: { records: CortesiaRecord[] }
           </tbody>
         </table>
       </div>
+
+      {detalheAlvo && (
+        <DetalheModal
+          title="Dados da cortesia"
+          fields={[
+            { label: "Nome", value: detalheAlvo.nome },
+            { label: "WhatsApp", value: detalheAlvo.whatsapp },
+            { label: "E-mail", value: detalheAlvo.email },
+            { label: "CPF", value: detalheAlvo.cpf },
+            { label: "Modalidade", value: detalheAlvo.modalidade },
+            { label: "Unidade", value: detalheAlvo.unidade },
+            { label: "Dia(s)", value: detalheAlvo.dia },
+            { label: "Data(s) da aula", value: detalheAlvo.datasAula },
+            { label: "Horário", value: detalheAlvo.horario },
+            { label: "Limitação física", value: detalheAlvo.limitacao },
+            { label: "Presença confirmada", value: detalheAlvo.presencaConfirmada ? "Sim" : "Não" },
+            { label: "Cadastrado em", value: new Date(detalheAlvo.createdAt).toLocaleString("pt-BR") },
+          ]}
+          observacao={detalheAlvo.observacao}
+          onSaveObservacao={async (valor) => {
+            const result = await salvarObservacao("cortesia", detalheAlvo.id, valor);
+            if (result.ok) {
+              setItems((prev) => prev.map((item) => (item.id === detalheAlvo.id ? { ...item, observacao: valor } : item)));
+              setDetalheAlvo((prev) => (prev ? { ...prev, observacao: valor } : prev));
+            }
+            return result;
+          }}
+          onClose={() => setDetalheAlvo(null)}
+        />
+      )}
 
       {confirmAlvo && (
         <ConfirmDialog

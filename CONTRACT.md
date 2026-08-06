@@ -57,6 +57,7 @@ Corpo (`CortesiaPayload`, todos os campos `string`):
 | `email`      | E-mail                                                                |
 | `cpf`        | CPF formatado                                                        |
 | `modalidade` | `"Musculação"`, `"Cross Training"` ou `"Funcional Kids"`             |
+| `unidade`    | `"Telégrafo"` ou `"Sacramenta"` — só é escolha real para `"Musculação"`; em `"Cross Training"` e `"Funcional Kids"` vem sempre `"Telégrafo"`, já que essas modalidades só existem nessa unidade |
 | `horario`    | Rótulo do horário                                                     |
 | `dia`        | Dia(s) da semana — no Cross Training pode ser uma lista tipo `"Segunda, Terça, Quarta"` |
 | `datasAula`  | Data(s) reais calculadas (`dd/mm/aaaa`), mesma cardinalidade de `dia` |
@@ -143,6 +144,7 @@ Cada registro retornado = os mesmos campos do `POST` correspondente, **mais**:
 | ----------- | ------------------------------------ |
 | `id`        | Identificador único do registro      |
 | `createdAt` | Data/hora de criação, ISO 8601       |
+| `observacao` | `string` — anotação interna da recepção sobre o registro (ver seção 5.3). Se ainda não houver observação, retornar `""` (nunca omitir o campo) |
 
 Além disso, cada registro de **`GET /cortesia`** especificamente também deve trazer:
 
@@ -209,6 +211,36 @@ seja, quando esse endpoint é chamado, não há mais desfazer possível do lado 
 uma segunda camada de segurança (soft-delete/lixeira no próprio Apps Script, por exemplo movendo a
 linha pra uma aba "Excluídos" em vez de removê-la de fato), isso fica a critério de quem implementar
 o backend — o frontend não depende disso, mas também não atrapalha.
+
+### 5.3 `PATCH /:recurso/:id/observacao` — registrar observação interna
+
+Novo. Existe um endpoint desses para cada uma das quatro coleções:
+
+- `PATCH /matricula/:id/observacao`
+- `PATCH /cortesia/:id/observacao`
+- `PATCH /avaliacao-fisica/:id/observacao`
+- `PATCH /avaliacao-nutricional/:id/observacao`
+
+Chamados pelos Route Handlers `app/api/admin/<recurso>/[id]/observacao/route.ts` do frontend (nunca
+diretamente pelo navegador) — **não precisam de CORS**. Permite à recepção deixar uma anotação livre
+sobre qualquer agendamento/cadastro (ex.: "remarcado por telefone", "aguardando pagamento"), editável
+a qualquer momento a partir do modal de detalhe de cada registro no admin.
+
+Header obrigatório: `Authorization: Bearer <token>`. Sem token válido → `401`.
+
+Requisição:
+```json
+{ "observacao": "texto livre, pode ser string vazia para limpar a observação" }
+```
+
+Resposta de sucesso: qualquer `2xx` — o frontend não lê o corpo, só atualiza o estado local
+otimisticamente. Resposta de erro: convenção padrão `{ "message": "..." }` (seção 1), por exemplo
+`404` se o `id` não existir mais na planilha.
+
+No Apps Script, isso implica adicionar uma coluna nova (ex.: "Observação") em **cada uma das quatro
+abas** e um caminho de escrita que localize a linha pelo `id` e atualize só essa célula — mesma
+mecânica de update-por-id já necessária pra seção 5.1 (presença de cortesia), só que agora replicada
+nas outras três abas, que hoje provavelmente só fazem leitura e append.
 
 ### Nota importante sobre o campo `whatsapp`
 

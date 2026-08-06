@@ -75,6 +75,7 @@ Agora é só seguir as recomendações e arrasar! 🚀`;
 export interface CortesiaTemplateData {
   nome: string;
   modalidade: string;
+  unidade: string;
   /** Pode ser um único dia ("Sexta") ou vários separados por vírgula ("Segunda, Terça, Quarta"). */
   dia: string;
   /** Mesma cardinalidade de `dia`, no formato dd/mm/aaaa, separadas por vírgula. */
@@ -92,11 +93,19 @@ function diasEDatasFormatados(dia: string, datasAula: string): string {
   return dias.map((d, i) => `${diaComFeiraECortesia(d)} dia ${datas[i] ?? ""}`).join(", ");
 }
 
-export function buildCortesiaConfirmMessage({ nome, modalidade, dia, datasAula, horario }: CortesiaTemplateData): string {
+export function buildCortesiaConfirmMessage({
+  nome,
+  modalidade,
+  unidade,
+  dia,
+  datasAula,
+  horario,
+}: CortesiaTemplateData): string {
   return `NOME: *${nome}*
 
 *Sua aula de cortesia de ${modalidade} foi confirmada!* 🎉
 
+📍 Unidade: *${unidade}*
 📅 ${diasEDatasFormatados(dia, datasAula)}
 🕐 Horário: *${horario}*
 

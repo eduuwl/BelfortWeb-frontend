@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Reveal from "@/components/ui/Reveal";
+import UnidadeToggle from "@/components/home/UnidadeToggle";
 import { PLANOS_TEASER_SACRAMENTA, PLANOS_TEASER_TELEGRAFO } from "@/lib/planosCards";
 import { Card } from "./Planos";
 
@@ -24,21 +25,7 @@ export default function PlanosTeaser() {
             plano
           </h2>
 
-          <div className="mb-10 flex gap-2">
-            {(["telegrafo", "sacramenta"] as const).map((u) => (
-              <button
-                key={u}
-                onClick={() => setUnidade(u)}
-                className={`rounded-lg border-[1.5px] px-6 py-[0.6rem] text-[0.85rem] font-semibold uppercase tracking-[0.06em] transition-all active:scale-95 ${
-                  unidade === u
-                    ? "border-white bg-white text-[var(--blue)]"
-                    : "border-white/25 bg-transparent text-white/60 hover:border-white hover:text-white"
-                }`}
-              >
-                {u === "telegrafo" ? "Telégrafo" : "Sacramenta"}
-              </button>
-            ))}
-          </div>
+          <UnidadeToggle unidade={unidade} onChange={setUnidade} />
         </Reveal>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

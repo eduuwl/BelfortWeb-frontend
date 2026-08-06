@@ -5,23 +5,29 @@ import type { AvaliacaoNutricionalPayload, AvaliacaoPayload, BannerRecord, Corte
 export interface MatriculaRecord extends MatriculaPayload {
   id: string;
   createdAt: string;
+  observacao: string;
 }
 
 export interface CortesiaRecord extends CortesiaPayload {
   id: string;
   createdAt: string;
   presencaConfirmada: boolean;
+  observacao: string;
 }
 
 export interface AvaliacaoRecord extends AvaliacaoPayload {
   id: string;
   createdAt: string;
+  observacao: string;
 }
 
 export interface AvaliacaoNutricionalRecord extends AvaliacaoNutricionalPayload {
   id: string;
   createdAt: string;
+  observacao: string;
 }
+
+export type RecursoObservavel = "matricula" | "cortesia" | "avaliacao-fisica" | "avaliacao-nutricional";
 
 export type BannerAdminRecord = BannerRecord;
 
@@ -112,6 +118,28 @@ export async function confirmarPresencaCortesia(id: string, confirmada: boolean)
     const data = await res.json().catch(() => null);
     const message = Array.isArray(data?.message) ? data.message[0] : data?.message;
     return { ok: false, message: message ?? "Não foi possível atualizar a presença." };
+  } catch {
+    return { ok: false, message: "Falha de conexão. Verifique sua internet e tente novamente." };
+  }
+}
+
+export async function salvarObservacao(
+  recurso: RecursoObservavel,
+  id: string,
+  observacao: string,
+): Promise<ActionResult> {
+  try {
+    const res = await fetch(`/api/admin/${recurso}/${id}/observacao`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ observacao }),
+    });
+
+    if (res.ok) return { ok: true };
+
+    const data = await res.json().catch(() => null);
+    const message = Array.isArray(data?.message) ? data.message[0] : data?.message;
+    return { ok: false, message: message ?? "Não foi possível salvar a observação." };
   } catch {
     return { ok: false, message: "Falha de conexão. Verifique sua internet e tente novamente." };
   }

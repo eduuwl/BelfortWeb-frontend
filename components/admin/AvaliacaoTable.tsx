@@ -1,16 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { deleteAvaliacao, type AvaliacaoRecord } from "@/lib/adminApi";
+import { deleteAvaliacao, salvarObservacao, type AvaliacaoRecord } from "@/lib/adminApi";
 import { buildAvaliacaoConfirmMessage, whatsappLinkForCustomer } from "@/lib/whatsappTemplates";
 import { useSoftDelete } from "@/lib/useSoftDelete";
 import ConfirmDialog from "./ConfirmDialog";
+import DetalheModal from "./DetalheModal";
 import UndoToast from "./UndoToast";
 import DeleteButton from "./DeleteButton";
 
 export default function AvaliacaoTable({ records }: { records: AvaliacaoRecord[] }) {
   const [confirmAlvo, setConfirmAlvo] = useState<AvaliacaoRecord | null>(null);
-  const { items, pending, requestDelete, undo, undoWindowMs, error, dismissError } = useSoftDelete(
+  const [detalheAlvo, setDetalheAlvo] = useState<AvaliacaoRecord | null>(null);
+  const { items, setItems, pending, requestDelete, undo, undoWindowMs, error, dismissError } = useSoftDelete(
     records,
     deleteAvaliacao,
   );
@@ -35,7 +37,11 @@ export default function AvaliacaoTable({ records }: { records: AvaliacaoRecord[]
           </thead>
           <tbody>
             {items.map((r) => (
-              <tr key={r.id} className="border-t border-[var(--gray-light)]">
+              <tr
+                key={r.id}
+                onClick={() => setDetalheAlvo(r)}
+                className="cursor-pointer border-t border-[var(--gray-light)] transition-colors hover:bg-[var(--off-white)]"
+              >
                 <td className="px-4 py-3 font-semibold text-[var(--text)]">{r.nome}</td>
                 <td className="px-4 py-3">{r.whatsapp}</td>
                 <td className="px-4 py-3">{r.unidade}</td>
@@ -43,7 +49,7 @@ export default function AvaliacaoTable({ records }: { records: AvaliacaoRecord[]
                   {r.dia} ({r.data})
                 </td>
                 <td className="px-4 py-3">{r.horario}</td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-2">
                     <a
                       href={whatsappLinkForCustomer(
@@ -64,6 +70,32 @@ export default function AvaliacaoTable({ records }: { records: AvaliacaoRecord[]
           </tbody>
         </table>
       </div>
+
+      {detalheAlvo && (
+        <DetalheModal
+          title="Dados da avaliação física"
+          fields={[
+            { label: "Nome", value: detalheAlvo.nome },
+            { label: "WhatsApp", value: detalheAlvo.whatsapp },
+            { label: "Unidade", value: detalheAlvo.unidade },
+            { label: "Dia", value: detalheAlvo.dia },
+            { label: "Data", value: detalheAlvo.data },
+            { label: "Horário", value: detalheAlvo.horario },
+            { label: "Valor", value: detalheAlvo.valor },
+            { label: "Cadastrado em", value: new Date(detalheAlvo.createdAt).toLocaleString("pt-BR") },
+          ]}
+          observacao={detalheAlvo.observacao}
+          onSaveObservacao={async (valor) => {
+            const result = await salvarObservacao("avaliacao-fisica", detalheAlvo.id, valor);
+            if (result.ok) {
+              setItems((prev) => prev.map((item) => (item.id === detalheAlvo.id ? { ...item, observacao: valor } : item)));
+              setDetalheAlvo((prev) => (prev ? { ...prev, observacao: valor } : prev));
+            }
+            return result;
+          }}
+          onClose={() => setDetalheAlvo(null)}
+        />
+      )}
 
       {confirmAlvo && (
         <ConfirmDialog

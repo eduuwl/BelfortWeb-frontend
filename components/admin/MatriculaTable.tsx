@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { deleteMatricula, type MatriculaRecord } from "@/lib/adminApi";
+import { deleteMatricula, salvarObservacao, type MatriculaRecord } from "@/lib/adminApi";
 import { buildMatriculaConfirmMessage, whatsappLinkForCustomer } from "@/lib/whatsappTemplates";
 import { useSoftDelete } from "@/lib/useSoftDelete";
 import MatriculaNumeroModal from "./MatriculaNumeroModal";
-import MatriculaDetalheModal from "./MatriculaDetalheModal";
+import DetalheModal from "./DetalheModal";
 import ConfirmDialog from "./ConfirmDialog";
 import UndoToast from "./UndoToast";
 import DeleteButton from "./DeleteButton";
@@ -14,7 +14,7 @@ export default function MatriculaTable({ records }: { records: MatriculaRecord[]
   const [contatoAlvo, setContatoAlvo] = useState<MatriculaRecord | null>(null);
   const [confirmAlvo, setConfirmAlvo] = useState<MatriculaRecord | null>(null);
   const [detalheAlvo, setDetalheAlvo] = useState<MatriculaRecord | null>(null);
-  const { items, pending, requestDelete, undo, undoWindowMs, error, dismissError } = useSoftDelete(
+  const { items, setItems, pending, requestDelete, undo, undoWindowMs, error, dismissError } = useSoftDelete(
     records,
     deleteMatricula,
   );
@@ -83,7 +83,36 @@ export default function MatriculaTable({ records }: { records: MatriculaRecord[]
       )}
 
       {detalheAlvo && (
-        <MatriculaDetalheModal matricula={detalheAlvo} onClose={() => setDetalheAlvo(null)} />
+        <DetalheModal
+          title="Dados do pré-cadastro"
+          fields={[
+            { label: "Nome", value: detalheAlvo.nome },
+            { label: "Data de nascimento", value: detalheAlvo.nascimento },
+            { label: "E-mail", value: detalheAlvo.email },
+            { label: "CPF", value: detalheAlvo.cpf },
+            { label: "Endereço", value: detalheAlvo.endereco },
+            { label: "WhatsApp", value: detalheAlvo.whatsapp },
+            { label: "Instagram", value: detalheAlvo.instagram },
+            { label: "Limitação física", value: detalheAlvo.limitacao },
+            { label: "Modalidade", value: detalheAlvo.modalidade },
+            { label: "Unidade", value: detalheAlvo.unidade },
+            { label: "Horário", value: detalheAlvo.horario },
+            { label: "CREF (personal externo)", value: detalheAlvo.cref },
+            { label: "Plano", value: detalheAlvo.plano },
+            { label: "Aceite do termo", value: detalheAlvo.aceite },
+            { label: "Cadastrado em", value: new Date(detalheAlvo.createdAt).toLocaleString("pt-BR") },
+          ]}
+          observacao={detalheAlvo.observacao}
+          onSaveObservacao={async (valor) => {
+            const result = await salvarObservacao("matricula", detalheAlvo.id, valor);
+            if (result.ok) {
+              setItems((prev) => prev.map((item) => (item.id === detalheAlvo.id ? { ...item, observacao: valor } : item)));
+              setDetalheAlvo((prev) => (prev ? { ...prev, observacao: valor } : prev));
+            }
+            return result;
+          }}
+          onClose={() => setDetalheAlvo(null)}
+        />
       )}
 
       {confirmAlvo && (

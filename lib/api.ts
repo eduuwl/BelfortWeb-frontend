@@ -23,6 +23,7 @@ export interface CortesiaPayload {
   email: string;
   cpf: string;
   modalidade: string;
+  unidade: string;
   horario: string;
   dia: string;
   datasAula: string;
