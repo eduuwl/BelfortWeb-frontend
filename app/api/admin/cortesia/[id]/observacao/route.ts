@@ -6,3 +6,5 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const body = await request.json().catch(() => null);
   return proxyAdminPatch(`/cortesia/${id}/observacao`, { observacao: String(body?.observacao ?? "") });
 }
+
+//so pra commitar
