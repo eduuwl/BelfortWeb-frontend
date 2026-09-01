@@ -6,6 +6,7 @@ export interface MatriculaRecord extends MatriculaPayload {
   id: string;
   createdAt: string;
   observacao: string;
+  numeroMatricula: string;
 }
 
 export interface CortesiaRecord extends CortesiaPayload {
@@ -140,6 +141,24 @@ export async function salvarObservacao(
     const data = await res.json().catch(() => null);
     const message = Array.isArray(data?.message) ? data.message[0] : data?.message;
     return { ok: false, message: message ?? "Não foi possível salvar a observação." };
+  } catch {
+    return { ok: false, message: "Falha de conexão. Verifique sua internet e tente novamente." };
+  }
+}
+
+export async function salvarNumeroMatricula(id: string, numeroMatricula: string): Promise<ActionResult> {
+  try {
+    const res = await fetch(`/api/admin/matricula/${id}/numero-matricula`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ numeroMatricula }),
+    });
+
+    if (res.ok) return { ok: true };
+
+    const data = await res.json().catch(() => null);
+    const message = Array.isArray(data?.message) ? data.message[0] : data?.message;
+    return { ok: false, message: message ?? "Não foi possível salvar o número da matrícula." };
   } catch {
     return { ok: false, message: "Falha de conexão. Verifique sua internet e tente novamente." };
   }

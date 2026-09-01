@@ -48,16 +48,28 @@ export default function DetalheModal({
   observacao,
   onSaveObservacao,
   onClose,
+  extraField,
 }: {
   title: string;
   fields: { label: string; value: string }[];
   observacao: string;
   onSaveObservacao: (value: string) => Promise<ActionResult>;
   onClose: () => void;
+  extraField?: {
+    label: string;
+    value: string;
+    placeholder?: string;
+    savedMessage?: string;
+    onSave: (value: string) => Promise<ActionResult>;
+  };
 }) {
   const [draft, setDraft] = useState(observacao);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ ok: boolean; message: string } | null>(null);
+
+  const [extraDraft, setExtraDraft] = useState(extraField?.value ?? "");
+  const [extraSaving, setExtraSaving] = useState(false);
+  const [extraFeedback, setExtraFeedback] = useState<{ ok: boolean; message: string } | null>(null);
 
   async function handleSave() {
     setSaving(true);
@@ -70,6 +82,20 @@ export default function DetalheModal({
       return;
     }
     setFeedback({ ok: true, message: "Observação salva." });
+  }
+
+  async function handleSaveExtra() {
+    if (!extraField) return;
+    setExtraSaving(true);
+    setExtraFeedback(null);
+    const result = await extraField.onSave(extraDraft.trim());
+    setExtraSaving(false);
+
+    if (!result.ok) {
+      setExtraFeedback({ ok: false, message: result.message });
+      return;
+    }
+    setExtraFeedback({ ok: true, message: extraField.savedMessage ?? "Salvo." });
   }
 
   return (
@@ -96,6 +122,39 @@ export default function DetalheModal({
             <CopyField key={f.label} label={f.label} value={f.value} />
           ))}
         </div>
+
+        {extraField && (
+          <div className="mt-4 border-t border-[var(--gray-light)] pt-4">
+            <label className="mb-1.5 block text-[0.68rem] font-semibold uppercase tracking-[0.06em] text-[var(--gray)]">
+              {extraField.label}
+            </label>
+            <input
+              value={extraDraft}
+              onChange={(e) => {
+                setExtraDraft(e.target.value);
+                setExtraFeedback(null);
+              }}
+              placeholder={extraField.placeholder}
+              className="w-full rounded-[10px] border-[1.5px] border-[var(--gray-light)] bg-white px-3 py-2.5 text-[0.85rem] text-[var(--text)] outline-none transition-all focus:border-[var(--blue-light)]"
+            />
+
+            <div className="mt-2 flex items-center justify-between gap-2">
+              {extraFeedback && (
+                <p className={`text-[0.75rem] ${extraFeedback.ok ? "text-[#166534]" : "text-[var(--red)]"}`}>
+                  {extraFeedback.message}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={handleSaveExtra}
+                disabled={extraSaving || extraDraft === extraField.value}
+                className="ml-auto rounded-lg bg-[var(--blue)] px-4 py-2 text-[0.78rem] font-semibold text-white transition-colors hover:bg-[var(--blue-mid)] disabled:cursor-not-allowed disabled:opacity-45"
+              >
+                {extraSaving ? "Salvando..." : "Salvar"}
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="mt-4 border-t border-[var(--gray-light)] pt-4">
           <label className="mb-1.5 block text-[0.68rem] font-semibold uppercase tracking-[0.06em] text-[var(--gray)]">

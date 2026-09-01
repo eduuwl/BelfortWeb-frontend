@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { deleteMatricula, salvarObservacao, type MatriculaRecord } from "@/lib/adminApi";
+import { deleteMatricula, salvarNumeroMatricula, salvarObservacao, type MatriculaRecord } from "@/lib/adminApi";
 import { buildMatriculaConfirmMessage, whatsappLinkForCustomer } from "@/lib/whatsappTemplates";
 import { useSoftDelete } from "@/lib/useSoftDelete";
 import MatriculaNumeroModal from "./MatriculaNumeroModal";
@@ -34,6 +34,7 @@ export default function MatriculaTable({ records }: { records: MatriculaRecord[]
               <th className="px-4 py-3">Modalidade</th>
               <th className="px-4 py-3">Unidade</th>
               <th className="px-4 py-3">Plano</th>
+              <th className="px-4 py-3">Matrícula</th>
               <th className="px-4 py-3" />
             </tr>
           </thead>
@@ -49,6 +50,17 @@ export default function MatriculaTable({ records }: { records: MatriculaRecord[]
                 <td className="px-4 py-3">{r.modalidade}</td>
                 <td className="px-4 py-3">{r.unidade}</td>
                 <td className="px-4 py-3">{r.plano}</td>
+                <td className="px-4 py-3">
+                  {r.numeroMatricula ? (
+                    <span className="inline-flex items-center rounded-full bg-[#dcfce7] px-2.5 py-1 text-[0.72rem] font-semibold text-[#166534]">
+                      Nº {r.numeroMatricula}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center rounded-full bg-[var(--off-white)] px-2.5 py-1 text-[0.72rem] font-semibold text-[var(--gray)]">
+                      Pendente
+                    </span>
+                  )}
+                </td>
                 <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-2">
                     <button
@@ -110,6 +122,22 @@ export default function MatriculaTable({ records }: { records: MatriculaRecord[]
               setDetalheAlvo((prev) => (prev ? { ...prev, observacao: valor } : prev));
             }
             return result;
+          }}
+          extraField={{
+            label: "Número da matrícula",
+            value: detalheAlvo.numeroMatricula,
+            placeholder: "Ex: 0451",
+            savedMessage: "Matrícula confirmada.",
+            onSave: async (valor) => {
+              const result = await salvarNumeroMatricula(detalheAlvo.id, valor);
+              if (result.ok) {
+                setItems((prev) =>
+                  prev.map((item) => (item.id === detalheAlvo.id ? { ...item, numeroMatricula: valor } : item)),
+                );
+                setDetalheAlvo((prev) => (prev ? { ...prev, numeroMatricula: valor } : prev));
+              }
+              return result;
+            },
           }}
           onClose={() => setDetalheAlvo(null)}
         />
