@@ -20,7 +20,7 @@ export default function MatriculasPage() {
       {!error && !records && <p className="text-[0.85rem] text-[var(--gray)]">Carregando...</p>}
       {!error && records && (
         <>
-          <MatriculaTable key={`${unidade}-${page}`} records={records} />
+          <MatriculaTable records={records} />
           <Pagination page={page} total={total} limit={limit} onChange={goToPage} disabled={loading} />
         </>
       )}

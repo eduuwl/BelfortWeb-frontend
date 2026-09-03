@@ -15,7 +15,7 @@ export default function BannersPage() {
       {!error && !records && <p className="text-[0.85rem] text-[var(--gray)]">Carregando...</p>}
       {!error && records && (
         <>
-          <BannerManager key={page} records={records} />
+          <BannerManager records={records} />
           <Pagination page={page} total={total} limit={limit} onChange={goToPage} disabled={loading} />
         </>
       )}

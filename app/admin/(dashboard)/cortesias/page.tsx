@@ -35,7 +35,7 @@ export default function CortesiasPage() {
       {!error && !records && <p className="text-[0.85rem] text-[var(--gray)]">Carregando...</p>}
       {!error && records && (
         <>
-          <CortesiaTable key={`${unidade}-${page}`} records={records} />
+          <CortesiaTable records={records} />
           <Pagination page={page} total={total} limit={limit} onChange={goToPage} disabled={loading} />
         </>
       )}
