@@ -14,10 +14,10 @@ export default function BannersPage() {
       {error && <p className="text-[0.85rem] text-[var(--red)]">{error}</p>}
       {!error && !records && <p className="text-[0.85rem] text-[var(--gray)]">Carregando...</p>}
       {!error && records && (
-        <>
+        <div className={loading ? "opacity-50 transition-opacity" : "transition-opacity"}>
           <BannerManager records={records} />
           <Pagination page={page} total={total} limit={limit} onChange={goToPage} disabled={loading} />
-        </>
+        </div>
       )}
     </div>
   );

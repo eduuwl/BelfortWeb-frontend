@@ -34,10 +34,21 @@ export function useAdminList<T, F = undefined>(
   const [state, setState] = useState<AdminListState<T>>(INITIAL_STATE as AdminListState<T>);
   const [loading, setLoading] = useState(false);
 
+  // Liga `loading` assim que `filter` muda (ex.: trocar de aba de unidade) — ajustado durante a
+  // própria renderização, não no efeito abaixo, pelo mesmo motivo do useSoftDelete: setState
+  // direto no corpo de um useEffect aciona o lint react-hooks/set-state-in-effect. Sem isso não
+  // tinha nenhum feedback visual de carregamento ao trocar de aba (só ao clicar Anterior/Próxima).
+  const [prevFilter, setPrevFilter] = useState(filter);
+  if (filter !== prevFilter) {
+    setPrevFilter(filter);
+    setLoading(true);
+  }
+
   useEffect(() => {
     let active = true;
     fetchPage(1, undefined, filter).then((result) => {
       if (!active) return;
+      setLoading(false);
       if (!result.ok) {
         if (result.status === 401) {
           router.push("/admin/login");
