@@ -1,40 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { fetchMatriculas, type MatriculaRecord } from "@/lib/adminApi";
+import { useState } from "react";
+import { fetchMatriculas } from "@/lib/adminApi";
+import { useAdminList } from "@/lib/useAdminList";
+import type { Unidade } from "@/lib/planos";
 import MatriculaTable from "@/components/admin/MatriculaTable";
+import Pagination from "@/components/admin/Pagination";
+import UnidadeFilterTabs from "@/components/admin/UnidadeFilterTabs";
 
 export default function MatriculasPage() {
-  const router = useRouter();
-  const [records, setRecords] = useState<MatriculaRecord[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    fetchMatriculas().then((result) => {
-      if (!active) return;
-      if (!result.ok) {
-        if (result.status === 401) {
-          router.push("/admin/login");
-          return;
-        }
-        setError(result.message);
-        return;
-      }
-      setRecords(result.result.data);
-    });
-    return () => {
-      active = false;
-    };
-  }, [router]);
+  const [unidade, setUnidade] = useState<Unidade>("telegrafo");
+  const { records, error, page, total, limit, loading, goToPage } = useAdminList(fetchMatriculas, unidade);
 
   return (
     <div>
       <h1 className="font-heading mb-6 text-2xl tracking-[0.03em] text-[var(--blue)]">Pré-cadastros</h1>
+      <UnidadeFilterTabs unidade={unidade} onChange={setUnidade} />
       {error && <p className="text-[0.85rem] text-[var(--red)]">{error}</p>}
       {!error && !records && <p className="text-[0.85rem] text-[var(--gray)]">Carregando...</p>}
-      {!error && records && <MatriculaTable records={records} />}
+      {!error && records && (
+        <>
+          <MatriculaTable key={`${unidade}-${page}`} records={records} />
+          <Pagination page={page} total={total} limit={limit} onChange={goToPage} disabled={loading} />
+        </>
+      )}
     </div>
   );
 }

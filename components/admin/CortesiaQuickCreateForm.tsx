@@ -49,7 +49,7 @@ const INITIAL_STATE: FormState = {
   dia: null,
 };
 
-export default function CortesiaQuickCreateForm({ onCreated }: { onCreated: () => void }) {
+export default function CortesiaQuickCreateForm({ onCreated }: { onCreated: (unidade: Unidade) => void }) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(INITIAL_STATE);
   const [submitting, setSubmitting] = useState(false);
@@ -120,7 +120,7 @@ export default function CortesiaQuickCreateForm({ onCreated }: { onCreated: () =
 
     resetForm();
     setOpen(false);
-    onCreated();
+    onCreated(form.unidade ?? "telegrafo");
   }
 
   if (!open) {

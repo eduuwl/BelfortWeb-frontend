@@ -155,6 +155,12 @@ Além disso, cada registro de **`GET /cortesia`** especificamente também deve t
 Se a coluna correspondente na planilha ainda não tiver sido preenchida para um registro antigo,
 retornar `false` (nunca omitir o campo).
 
+Além disso, cada registro de **`GET /matricula`** especificamente também deve trazer:
+
+| Campo             | Descrição                                                              |
+| ------------------ | ------------------------------------------------------------------------ |
+| `numeroMatricula` | `string` — número oficial da matrícula (ver seção 5.4). `""` se ainda não foi anexado (nunca omitir o campo) |
+
 **Importante:** o `id` retornado aqui precisa ser um identificador **estável**, porque agora ele também
 é usado para localizar a linha certa na escrita da seção 5.1 abaixo — não é mais usado só pra exibição.
 
@@ -181,11 +187,22 @@ cortesias e um caminho de escrita que localize a linha pelo `id` e atualize só 
 `doGet`/`doPost` existentes provavelmente só fazem leitura e append, então essa é uma operação nova
 (update por id), não só um campo a mais.
 
-**Proposta de paginação** (não validada com backend real — o backend implementador pode propor algo
-diferente): query params `?page=1&limit=20`, resposta:
+**Paginação** (já implementada): query params `?page=1&limit=20` (limite máximo aceito: 100),
+resposta:
 ```json
 { "data": [ /* registros */ ], "total": 132, "page": 1, "limit": 20 }
 ```
+O frontend hoje pede `limit=50` por padrão e navega com botões Anterior/Próxima usando `total`.
+
+**Filtro por unidade** (já implementado, nos quatro `GET` desta seção): query param opcional
+`?unidade=telegrafo` ou `?unidade=sacramenta` — filtra a listagem por esse valor antes de paginar
+(comparação tolerante a acento/maiúscula, então `"Telégrafo"`, `"telegrafo"` e `"TELÉGRAFO"` são
+equivalentes). Sem esse parâmetro, devolve todas as unidades. Usado pelas abas Telégrafo/Sacramenta
+de cada tela do admin.
+
+**Ordenação de `GET /cortesia`** (já implementada): os registros vêm ordenados pela data da aula
+(`datasAula`, a mais próxima primeiro), não pela ordem de inscrição na planilha — com muitas
+cortesias marcadas por dia, isso evita que a recepção precise garimpar a agenda fora de ordem.
 
 ### 5.2 `DELETE /:recurso/:id` — apagar registro
 
@@ -241,6 +258,24 @@ No Apps Script, isso implica adicionar uma coluna nova (ex.: "Observação") em 
 abas** e um caminho de escrita que localize a linha pelo `id` e atualize só essa célula — mesma
 mecânica de update-por-id já necessária pra seção 5.1 (presença de cortesia), só que agora replicada
 nas outras três abas, que hoje provavelmente só fazem leitura e append.
+
+### 5.4 `PATCH /matricula/:id/numero-matricula` — anexar número da matrícula
+
+Novo. Chamado pelo Route Handler `app/api/admin/matricula/[id]/numero-matricula/route.ts` do
+frontend (nunca diretamente pelo navegador) — **não precisa de CORS**. Grava o número de matrícula
+oficial depois que o aluno confirma a ativação (só existe pra `matricula`, as outras três coleções
+não têm esse conceito).
+
+Header obrigatório: `Authorization: Bearer <token>`. Sem token válido → `401`.
+
+Requisição:
+```json
+{ "numeroMatricula": "0451" }
+```
+
+Resposta de sucesso: qualquer `2xx`. Resposta de erro: convenção padrão `{ "message": "..." }`
+(seção 1). `GET /matricula` passa a incluir `numeroMatricula` em cada registro (`""` se ainda não
+foi preenchido — nunca omitir o campo, mesma convenção de `observacao`).
 
 ### Nota importante sobre o campo `whatsapp`
 
