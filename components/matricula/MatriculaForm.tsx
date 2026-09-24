@@ -277,7 +277,13 @@ export default function MatriculaForm() {
               <StepTitle>Dados pessoais</StepTitle>
               <StepDesc>Vamos começar com suas informações básicas.</StepDesc>
 
-              <FieldInput label="Nome completo *" value={form.nome} onChange={(v) => update("nome", v)} placeholder="Ex: João Silva" />
+              <FieldInput
+                label="Nome completo *"
+                value={form.nome}
+                onChange={(v) => update("nome", v)}
+                placeholder="Ex: João Costa Silva"
+                hint={<span className="font-normal normal-case text-[var(--gray)]">(nome completo, não só primeiro e último)</span>}
+              />
               <FieldInput label="Data de nascimento *" type="date" value={form.nascimento} onChange={(v) => update("nascimento", v)} />
 
               {menorDeIdade && (
@@ -290,7 +296,7 @@ export default function MatriculaForm() {
                     label="Nome completo do responsável *"
                     value={form.responsavelNome}
                     onChange={(v) => update("responsavelNome", v)}
-                    placeholder="Ex: Maria Silva"
+                    placeholder="Ex: Maria Costa Silva"
                   />
                   <FieldInput
                     label="WhatsApp do responsável *"

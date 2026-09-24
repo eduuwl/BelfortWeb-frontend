@@ -37,10 +37,12 @@ export function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-/** Exige nome + sobrenome (pelo menos 2 partes), cada uma com 2+ letras — sem números/símbolos. */
+// Exige nome completo de verdade (pelo menos 3 partes — nome, nome do meio e sobrenome), não só
+// "primeiro e último nome". Ex: "João Silva" é rejeitado, "João Costa Silva" passa. Cada parte
+// precisa ter 2+ letras — sem números/símbolos.
 export function nomeCompletoValido(nomeRaw: string): boolean {
   const partes = nomeRaw.trim().split(/\s+/).filter(Boolean);
-  if (partes.length < 2) return false;
+  if (partes.length < 3) return false;
   return partes.every((parte) => parte.length >= 2 && /^[A-Za-zÀ-ÖØ-öø-ÿ'-]+$/.test(parte));
 }
 
