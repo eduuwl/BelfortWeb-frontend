@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BoltIcon, FaceSmileIcon, FireIcon, MapPinIcon, PlusIcon } from "@heroicons/react/24/solid";
+import { BoltIcon, ExclamationTriangleIcon, FaceSmileIcon, FireIcon, MapPinIcon, PlusIcon } from "@heroicons/react/24/solid";
 import {
   BtnPrimary,
   DiaButton,
@@ -13,7 +13,7 @@ import {
   OptionGrid,
   ToggleRow,
 } from "@/components/form/FormControls";
-import { cpfValido, isValidEmail, maskCPF, maskPhone } from "@/lib/validators";
+import { cpfValido, formatDate, isMenorDeIdade, isValidEmail, maskCPF, maskPhone, nomeCompletoValido } from "@/lib/validators";
 import {
   deriveCortesiaAgendamento,
   diasOpcoesParaModalidade,
@@ -27,26 +27,34 @@ interface FormState {
   modalidade: Modalidade | null;
   unidade: Unidade | null;
   nome: string;
+  nascimento: string;
   whatsapp: string;
+  whatsappEmergencia: string;
   email: string;
   cpf: string;
   limitacao: boolean | null;
   limitacaoDesc: string;
   horario: string | null;
   dia: string | null;
+  responsavelNome: string;
+  responsavelWhatsapp: string;
 }
 
 const INITIAL_STATE: FormState = {
   modalidade: null,
   unidade: null,
   nome: "",
+  nascimento: "",
   whatsapp: "",
+  whatsappEmergencia: "",
   email: "",
   cpf: "",
   limitacao: null,
   limitacaoDesc: "",
   horario: null,
   dia: null,
+  responsavelNome: "",
+  responsavelWhatsapp: "",
 };
 
 export default function CortesiaQuickCreateForm({ onCreated }: { onCreated: (unidade: Unidade) => void }) {
@@ -76,17 +84,21 @@ export default function CortesiaQuickCreateForm({ onCreated }: { onCreated: (uni
   );
   const diasOpcoes = diasOpcoesParaModalidade(form.modalidade, crossSomenteSabado, form.horario);
 
+  const menorDeIdade = isMenorDeIdade(form.nascimento);
+
   const formOk =
     form.modalidade !== null &&
     (form.modalidade !== "musculacao" || form.unidade !== null) &&
-    form.nome.trim().length >= 3 &&
-    form.nome.trim().includes(" ") &&
+    nomeCompletoValido(form.nome) &&
+    form.nascimento !== "" &&
     form.whatsapp.replace(/\D/g, "").length >= 10 &&
+    form.whatsappEmergencia.replace(/\D/g, "").length >= 10 &&
     isValidEmail(form.email.trim()) &&
     cpfValido(form.cpf) &&
     form.limitacao !== null &&
     form.horario !== null &&
-    form.dia !== null;
+    form.dia !== null &&
+    (!menorDeIdade || (nomeCompletoValido(form.responsavelNome) && form.responsavelWhatsapp.replace(/\D/g, "").length >= 10));
 
   function resetForm() {
     setForm(INITIAL_STATE);
@@ -100,7 +112,9 @@ export default function CortesiaQuickCreateForm({ onCreated }: { onCreated: (uni
 
     const result = await submitCortesia({
       nome: form.nome.trim(),
+      nascimento: formatDate(form.nascimento),
       whatsapp: form.whatsapp.trim(),
+      whatsappEmergencia: form.whatsappEmergencia.trim(),
       email: form.email.trim(),
       cpf: form.cpf.trim(),
       modalidade: modalidadeLabel(form.modalidade),
@@ -109,6 +123,8 @@ export default function CortesiaQuickCreateForm({ onCreated }: { onCreated: (uni
       dia: diasStr,
       datasAula,
       limitacao: form.limitacao ? form.limitacaoDesc.trim() || "Sim" : "Não",
+      responsavelNome: menorDeIdade ? form.responsavelNome.trim() : "",
+      responsavelWhatsapp: menorDeIdade ? form.responsavelWhatsapp.trim() : "",
     });
 
     setSubmitting(false);
@@ -170,7 +186,36 @@ export default function CortesiaQuickCreateForm({ onCreated }: { onCreated: (uni
       )}
 
       <FieldInput label="Nome completo" value={form.nome} onChange={(v) => update("nome", v)} placeholder="Ex: João Silva" />
+      <FieldInput label="Data de nascimento" type="date" value={form.nascimento} onChange={(v) => update("nascimento", v)} />
+
+      {menorDeIdade && (
+        <div className="mb-4 rounded-[10px] border-[1.5px] border-[var(--blue-light)] bg-[#EEF3FC] p-4">
+          <p className="mb-3 flex items-start gap-2 text-[0.8rem] leading-relaxed text-[var(--blue)]">
+            <ExclamationTriangleIcon className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>Aluno menor de idade — precisamos dos dados de um responsável.</span>
+          </p>
+          <FieldInput
+            label="Nome completo do responsável"
+            value={form.responsavelNome}
+            onChange={(v) => update("responsavelNome", v)}
+            placeholder="Ex: Maria Silva"
+          />
+          <FieldInput
+            label="WhatsApp do responsável"
+            value={form.responsavelWhatsapp}
+            onChange={(v) => update("responsavelWhatsapp", maskPhone(v))}
+            placeholder="91988776655"
+          />
+        </div>
+      )}
+
       <FieldInput label="WhatsApp (com DDD)" value={form.whatsapp} onChange={(v) => update("whatsapp", maskPhone(v))} placeholder="Ex: 91988776655" />
+      <FieldInput
+        label="WhatsApp de emergência"
+        value={form.whatsappEmergencia}
+        onChange={(v) => update("whatsappEmergencia", maskPhone(v))}
+        placeholder="Ex: 91988776655"
+      />
       <FieldInput label="E-mail" type="email" value={form.email} onChange={(v) => update("email", v)} placeholder="seu@email.com" />
       <FieldInput label="CPF" value={form.cpf} onChange={(v) => update("cpf", maskCPF(v))} placeholder="000.000.000-00" maxLength={14} />
 

@@ -25,22 +25,25 @@ Este documento é a fonte de verdade para quem for implementar o backend. Onde a
 
 Corpo (`MatriculaPayload`, todos os campos `string`):
 
-| Campo         | Descrição                                                                 |
-| ------------- | -------------------------------------------------------------------------- |
-| `nome`        | Nome completo                                                              |
-| `nascimento`  | Data de nascimento, formato `dd/mm/aaaa`                                   |
-| `email`       | E-mail                                                                     |
-| `cpf`         | CPF formatado (`000.000.000-00`)                                          |
-| `endereco`    | Endereço completo                                                          |
-| `whatsapp`    | Dígitos locais (DDD + número), **sem** código do país                      |
-| `instagram`   | Opcional — pode vir vazio (`""`)                                          |
-| `limitacao`   | `"Não"` ou a descrição da limitação física                                |
-| `modalidade`  | Rótulo legível: `"Musculação"`, `"Cross Training"`, `"Funcional Kids"` ou `"Personal Trainer"` |
-| `unidade`     | `"Telégrafo"` ou `"Sacramenta"`                                           |
-| `horario`     | Rótulo do horário escolhido                                               |
-| `cref`        | CREF do personal trainer externo, ou `""` quando não se aplica            |
-| `plano`       | Nome do plano escolhido                                                   |
-| `aceite`      | Sempre `"Sim"` (usuário aceitou o termo de adesão antes de enviar)         |
+| Campo                 | Descrição                                                                 |
+| ---------------------- | -------------------------------------------------------------------------- |
+| `nome`                | Nome completo — frontend exige nome + sobrenome                           |
+| `nascimento`          | Data de nascimento, formato `dd/mm/aaaa`                                   |
+| `email`               | E-mail                                                                     |
+| `cpf`                 | CPF formatado (`000.000.000-00`)                                          |
+| `endereco`            | Endereço completo                                                          |
+| `whatsapp`            | Dígitos locais (DDD + número), **sem** código do país                      |
+| `whatsappEmergencia`  | Segundo número de contato, mesmo formato de `whatsapp`. **Obrigatório para todo aluno**, independente da idade |
+| `instagram`           | Opcional — pode vir vazio (`""`)                                          |
+| `limitacao`           | `"Não"` ou a descrição da limitação física                                |
+| `modalidade`          | Rótulo legível: `"Musculação"`, `"Cross Training"`, `"Funcional Kids"` ou `"Personal Trainer"` |
+| `unidade`             | `"Telégrafo"` ou `"Sacramenta"`                                           |
+| `horario`             | Rótulo do horário escolhido                                               |
+| `cref`                | CREF do personal trainer externo, ou `""` quando não se aplica            |
+| `plano`               | Nome do plano escolhido                                                   |
+| `responsavelNome`     | Nome completo do responsável. **Obrigatório quando o aluno é menor de idade** (calculado a partir de `nascimento`), `""` caso contrário |
+| `responsavelWhatsapp` | WhatsApp do responsável, mesmo formato de `whatsapp`. Mesma regra de `responsavelNome` |
+| `aceite`              | Sempre `"Sim"` (usuário aceitou o termo de adesão antes de enviar)         |
 
 Resposta: qualquer `2xx` é tratado como sucesso — o frontend hoje não lê o corpo da resposta de
 sucesso. **Isto está sub-especificado de propósito**; o backend tem liberdade aqui, mas recomenda-se
@@ -50,20 +53,33 @@ padronizar isso quando a área admin passar a depender de dados retornados no `P
 
 Corpo (`CortesiaPayload`, todos os campos `string`):
 
-| Campo        | Descrição                                                          |
-| ------------ | -------------------------------------------------------------------- |
-| `nome`       | Nome completo                                                        |
-| `whatsapp`   | Dígitos locais, sem código do país                                   |
-| `email`      | E-mail                                                                |
-| `cpf`        | CPF formatado                                                        |
-| `modalidade` | `"Musculação"`, `"Cross Training"` ou `"Funcional Kids"`             |
-| `unidade`    | `"Telégrafo"` ou `"Sacramenta"` — só é escolha real para `"Musculação"`; em `"Cross Training"` e `"Funcional Kids"` vem sempre `"Telégrafo"`, já que essas modalidades só existem nessa unidade |
-| `horario`    | Rótulo do horário                                                     |
-| `dia`        | Dia(s) da semana — no Cross Training pode ser uma lista tipo `"Segunda, Terça, Quarta"` |
-| `datasAula`  | Data(s) reais calculadas (`dd/mm/aaaa`), mesma cardinalidade de `dia` |
-| `limitacao`  | `"Não"` ou a descrição da limitação física                          |
+| Campo                 | Descrição                                                          |
+| ---------------------- | -------------------------------------------------------------------- |
+| `nome`                | Nome completo — frontend exige nome + sobrenome                     |
+| `nascimento`          | Data de nascimento, formato `dd/mm/aaaa`. Novo campo — usado pra calcular se o aluno é menor de idade |
+| `whatsapp`            | Dígitos locais, sem código do país                                   |
+| `whatsappEmergencia`  | Segundo número de contato, mesmo formato de `whatsapp`. **Obrigatório para todo aluno**, independente da idade |
+| `email`               | E-mail                                                                |
+| `cpf`                 | CPF formatado                                                        |
+| `modalidade`          | `"Musculação"`, `"Cross Training"` ou `"Funcional Kids"`             |
+| `unidade`             | `"Telégrafo"` ou `"Sacramenta"` — só é escolha real para `"Musculação"`; em `"Cross Training"` e `"Funcional Kids"` vem sempre `"Telégrafo"`, já que essas modalidades só existem nessa unidade |
+| `horario`             | Rótulo do horário                                                     |
+| `dia`                 | Dia(s) da semana — no Cross Training pode ser uma lista tipo `"Segunda, Terça, Quarta"` |
+| `datasAula`           | Data(s) reais calculadas (`dd/mm/aaaa`), mesma cardinalidade de `dia` |
+| `limitacao`           | `"Não"` ou a descrição da limitação física                          |
+| `responsavelNome`     | Nome completo do responsável. **Obrigatório quando o aluno é menor de idade** (calculado a partir de `nascimento`), `""` caso contrário |
+| `responsavelWhatsapp` | WhatsApp do responsável, mesmo formato de `whatsapp`. Mesma regra de `responsavelNome` |
 
 Resposta: mesmo comportamento de `POST /matricula` (só `2xx` importa hoje).
+
+### Nota — menor de idade (Matrícula e Cortesia)
+
+Regra de negócio nova, aplicada hoje só no frontend (o backend valida apenas o *tipo* desses campos,
+não a obrigatoriedade condicional — mesmo padrão já usado para `cref`, que só é obrigatório quando
+`modalidade` é `"Personal Trainer"` mas no DTO é só `@IsString()`): quando a idade calculada a partir
+de `nascimento` é menor que 18 anos, o formulário público passa a exigir `responsavelNome` e
+`responsavelWhatsapp` preenchidos antes de liberar o envio. Para alunos maiores de idade, esses dois
+campos vêm sempre como `""`.
 
 ## 3. Novo endpoint público: `POST /avaliacao-fisica`
 

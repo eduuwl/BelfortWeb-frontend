@@ -30,7 +30,7 @@ import {
   SuccessMsg,
   SuccessTitle,
 } from "@/components/form/FormShell";
-import { cpfValido, isValidEmail, maskCPF, maskPhone } from "@/lib/validators";
+import { cpfValido, formatDate, isMenorDeIdade, isValidEmail, maskCPF, maskPhone, nomeCompletoValido } from "@/lib/validators";
 import {
   deriveCortesiaAgendamento,
   diaEstaDesabilitado,
@@ -52,26 +52,34 @@ interface FormState {
   modalidade: Modalidade | null;
   unidade: Unidade | null;
   nome: string;
+  nascimento: string;
   whatsapp: string;
+  whatsappEmergencia: string;
   email: string;
   cpf: string;
   limitacao: boolean | null;
   limitacaoDesc: string;
   horario: string | null;
   dia: string | null;
+  responsavelNome: string;
+  responsavelWhatsapp: string;
 }
 
 const INITIAL_STATE: FormState = {
   modalidade: null,
   unidade: null,
   nome: "",
+  nascimento: "",
   whatsapp: "",
+  whatsappEmergencia: "",
   email: "",
   cpf: "",
   limitacao: null,
   limitacaoDesc: "",
   horario: null,
   dia: null,
+  responsavelNome: "",
+  responsavelWhatsapp: "",
 };
 
 const WHATSAPP_NUMERO = "5591984862479";
@@ -117,13 +125,17 @@ export default function CortesiaForm() {
 
   const step1Ok = form.modalidade !== null && (form.modalidade !== "musculacao" || form.unidade !== null);
 
+  const menorDeIdade = isMenorDeIdade(form.nascimento);
+
   const step2Ok =
-    form.nome.trim().length >= 3 &&
-    form.nome.trim().includes(" ") &&
+    nomeCompletoValido(form.nome) &&
+    form.nascimento !== "" &&
     form.whatsapp.replace(/\D/g, "").length >= 10 &&
+    form.whatsappEmergencia.replace(/\D/g, "").length >= 10 &&
     isValidEmail(form.email.trim()) &&
     cpfValido(form.cpf) &&
-    form.limitacao !== null;
+    form.limitacao !== null &&
+    (!menorDeIdade || (nomeCompletoValido(form.responsavelNome) && form.responsavelWhatsapp.replace(/\D/g, "").length >= 10));
 
   const step3Ok = form.horario !== null;
   const step4Ok = form.dia !== null;
@@ -164,7 +176,9 @@ export default function CortesiaForm() {
 
     const result = await submitCortesia({
       nome: form.nome.trim(),
+      nascimento: formatDate(form.nascimento),
       whatsapp: form.whatsapp.trim(),
+      whatsappEmergencia: form.whatsappEmergencia.trim(),
       email: form.email.trim(),
       cpf: form.cpf.trim(),
       modalidade: modalidadeLabel(form.modalidade),
@@ -173,6 +187,8 @@ export default function CortesiaForm() {
       dia: diasStr,
       datasAula,
       limitacao: form.limitacao ? form.limitacaoDesc.trim() || "Sim" : "Não",
+      responsavelNome: menorDeIdade ? form.responsavelNome.trim() : "",
+      responsavelWhatsapp: menorDeIdade ? form.responsavelWhatsapp.trim() : "",
     });
 
     setLoading(false);
@@ -259,7 +275,37 @@ export default function CortesiaForm() {
               <StepDesc>Precisamos de algumas informações para confirmar seu agendamento.</StepDesc>
 
               <FieldInput label="Nome completo" value={form.nome} onChange={(v) => update("nome", v)} placeholder="Ex: João Silva" />
+              <FieldInput label="Data de nascimento" type="date" value={form.nascimento} onChange={(v) => update("nascimento", v)} />
+
+              {menorDeIdade && (
+                <div className="mb-4 rounded-[10px] border-[1.5px] border-[var(--blue-light)] bg-[#EEF3FC] p-4">
+                  <p className="mb-3 flex items-start gap-2 text-[0.8rem] leading-relaxed text-[var(--blue)]">
+                    <ExclamationTriangleIcon className="mt-0.5 h-4 w-4 shrink-0" />
+                    <span>Aluno menor de idade — precisamos dos dados de um responsável.</span>
+                  </p>
+                  <FieldInput
+                    label="Nome completo do responsável"
+                    value={form.responsavelNome}
+                    onChange={(v) => update("responsavelNome", v)}
+                    placeholder="Ex: Maria Silva"
+                  />
+                  <FieldInput
+                    label="WhatsApp do responsável"
+                    value={form.responsavelWhatsapp}
+                    onChange={(v) => update("responsavelWhatsapp", maskPhone(v))}
+                    placeholder="91988776655"
+                  />
+                </div>
+              )}
+
               <FieldInput label="WhatsApp (com DDD)" value={form.whatsapp} onChange={(v) => update("whatsapp", maskPhone(v))} placeholder="Ex: 91988776655" />
+              <FieldInput
+                label="WhatsApp de emergência"
+                value={form.whatsappEmergencia}
+                onChange={(v) => update("whatsappEmergencia", maskPhone(v))}
+                placeholder="Ex: 91988776655"
+                hint={<span className="font-normal normal-case text-[var(--gray)]">(um segundo contato, caso não consigamos falar no primeiro)</span>}
+              />
               <FieldInput
                 label="E-mail"
                 type="email"
@@ -367,7 +413,15 @@ export default function CortesiaForm() {
                 <ResumoItem label="Modalidade" value={modalidadeLabel(form.modalidade)} />
                 <ResumoItem label="Unidade" value={unidadeLabel(form.unidade)} />
                 <ResumoItem label="Nome" value={form.nome.trim()} />
+                <ResumoItem label="Nascimento" value={formatDate(form.nascimento)} />
+                {menorDeIdade && (
+                  <>
+                    <ResumoItem label="Responsável" value={form.responsavelNome.trim()} />
+                    <ResumoItem label="WhatsApp do responsável" value={form.responsavelWhatsapp} />
+                  </>
+                )}
                 <ResumoItem label="WhatsApp" value={form.whatsapp} />
+                <ResumoItem label="WhatsApp de emergência" value={form.whatsappEmergencia} />
                 <ResumoItem label="E-mail" value={form.email.trim()} />
                 <ResumoItem label="CPF" value={form.cpf} />
                 <ResumoItem label="Horário" value={horarioLabel} />

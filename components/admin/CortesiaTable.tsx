@@ -133,7 +133,11 @@ export default function CortesiaTable({ records }: { records: CortesiaRecord[] }
           title="Dados da cortesia"
           fields={[
             { label: "Nome", value: detalheAlvo.nome },
+            { label: "Nascimento", value: detalheAlvo.nascimento },
             { label: "WhatsApp", value: detalheAlvo.whatsapp },
+            { label: "WhatsApp de emergência", value: detalheAlvo.whatsappEmergencia },
+            { label: "Responsável", value: detalheAlvo.responsavelNome },
+            { label: "WhatsApp do responsável", value: detalheAlvo.responsavelWhatsapp },
             { label: "E-mail", value: detalheAlvo.email },
             { label: "CPF", value: detalheAlvo.cpf },
             { label: "Modalidade", value: detalheAlvo.modalidade },
