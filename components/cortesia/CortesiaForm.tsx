@@ -332,7 +332,7 @@ export default function CortesiaForm() {
                   : form.modalidade === "cross"
                     ? "Escolha o primeiro dia — suas 3 aulas consecutivas serão definidas automaticamente."
                     : form.modalidade === "kids"
-                      ? "A turma acontece segunda, quarta e sexta — escolha o dia da sua aula experimental."
+                      ? "A turma acontece terça, quinta e sexta — escolha o dia da sua aula experimental."
                       : form.modalidade === "musculacao" && !horarioValidoNoSabado(form.horario)
                         ? "Escolha o melhor dia para sua aula experimental (aos sábados funcionamos só das 8h às 16h)."
                         : "Escolha o melhor dia para sua aula experimental."}

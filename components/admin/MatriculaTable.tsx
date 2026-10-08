@@ -103,6 +103,8 @@ export default function MatriculaTable({ records }: { records: MatriculaRecord[]
             { label: "E-mail", value: detalheAlvo.email },
             { label: "CPF", value: detalheAlvo.cpf },
             { label: "Endereço", value: detalheAlvo.endereco },
+            { label: "Complemento", value: detalheAlvo.complemento },
+            { label: "CEP", value: detalheAlvo.cep },
             { label: "WhatsApp", value: detalheAlvo.whatsapp },
             { label: "Instagram", value: detalheAlvo.instagram },
             { label: "Limitação física", value: detalheAlvo.limitacao },

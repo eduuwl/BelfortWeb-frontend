@@ -27,6 +27,12 @@ export function maskPhone(value: string): string {
   return value.replace(/\D/g, '').slice(0, 11);
 }
 
+export function maskCEP(value: string): string {
+  let v = value.replace(/\D/g, '').slice(0, 8);
+  v = v.replace(/(\d{5})(\d)/, '$1-$2');
+  return v;
+}
+
 export function formatDate(dateStr: string): string {
   if (!dateStr) return '';
   const [y, m, d] = dateStr.split('-');

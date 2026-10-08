@@ -56,7 +56,7 @@ export const PLANOS: Record<Modalidade, Record<Unidade, Plano[]>> = {
       {
         id: 'kids_mensal',
         nome: 'Mensal',
-        detalhe: 'Segunda, Quarta e Sexta às 17h',
+        detalhe: 'Terça, Quinta e Sexta às 17h30',
         preco: 'R$ 120,00',
         parcela: '',
       },

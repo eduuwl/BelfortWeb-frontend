@@ -118,7 +118,7 @@ export const TELEGRAFO: Grupo[] = [
     planos: [
       {
         nome: "Mensal",
-        periodo: "Seg, Qua e Sex · 17h",
+        periodo: "Ter, Qui e Sex · 17h30",
         preco: "120",
         parcela: "à vista",
         features: ["Turma exclusiva kids", "Unidade Telégrafo", "Acompanhamento especializado"],

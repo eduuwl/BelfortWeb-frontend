@@ -31,7 +31,9 @@ Corpo (`MatriculaPayload`, todos os campos `string`):
 | `nascimento`  | Data de nascimento, formato `dd/mm/aaaa`                                   |
 | `email`       | E-mail                                                                     |
 | `cpf`         | CPF formatado (`000.000.000-00`)                                          |
-| `endereco`    | Endereço completo                                                          |
+| `endereco`    | Endereço completo (rua, número, bairro)                                   |
+| `complemento` | Complemento do endereço (apto, bloco, ponto de referência) — opcional, pode vir vazio (`""`) |
+| `cep`         | CEP formatado (`00000-000`) — opcional, pode vir vazio (`""`)             |
 | `whatsapp`    | Dígitos locais (DDD + número), **sem** código do país                      |
 | `instagram`   | Opcional — pode vir vazio (`""`)                                          |
 | `limitacao`   | `"Não"` ou a descrição da limitação física                                |
@@ -45,6 +47,13 @@ Corpo (`MatriculaPayload`, todos os campos `string`):
 Resposta: qualquer `2xx` é tratado como sucesso — o frontend hoje não lê o corpo da resposta de
 sucesso. **Isto está sub-especificado de propósito**; o backend tem liberdade aqui, mas recomenda-se
 padronizar isso quando a área admin passar a depender de dados retornados no `POST`.
+
+**Atualização — campos novos (`complemento` e `cep`):** o formulário público de pré-cadastro passou
+a coletar esses dois campos opcionais, logo abaixo do campo `endereco` já existente. No Apps Script
+isso implica adicionar duas colunas novas (ex.: "Complemento" e "CEP") na aba de matrícula e incluir
+essas colunas no `append` do `doPost` de `/matricula` e na leitura do `GET /matricula` (seção 5) —
+registros antigos não vão ter essas colunas preenchidas; nesse caso, retornar `""` (nunca omitir o
+campo), mesma convenção já usada para `observacao` e `presencaConfirmada`.
 
 ### `POST /cortesia`
 

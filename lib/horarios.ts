@@ -32,9 +32,9 @@ export const HORARIOS_CROSS: HorarioSlot[] = [
 ];
 
 // Funcional Kids tem uma única turma fixa, só na unidade Telégrafo.
-export const HORARIOS_KIDS: HorarioSlot[] = [{ value: '17:00', label: '17:00 – 18:00 (Seg, Qua e Sex)' }];
+export const HORARIOS_KIDS: HorarioSlot[] = [{ value: '17:30', label: '17:30 – 18:30 (Ter, Qui e Sex)' }];
 
-export const DIAS_KIDS = ['Segunda', 'Quarta', 'Sexta'];
+export const DIAS_KIDS = ['Terça', 'Quinta', 'Sexta'];
 
 export const DIAS_SEMANA = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 

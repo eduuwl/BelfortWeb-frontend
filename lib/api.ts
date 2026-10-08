@@ -6,6 +6,8 @@ export interface MatriculaPayload {
   email: string;
   cpf: string;
   endereco: string;
+  complemento: string;
+  cep: string;
   whatsapp: string;
   instagram: string;
   limitacao: string;

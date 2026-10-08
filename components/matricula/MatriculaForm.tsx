@@ -34,7 +34,7 @@ import {
   SuccessTitle,
   TermoBox,
 } from "@/components/form/FormShell";
-import { cpfValido, formatDate, isValidEmail, maskCPF, maskPhone } from "@/lib/validators";
+import { cpfValido, formatDate, isValidEmail, maskCEP, maskCPF, maskPhone } from "@/lib/validators";
 import {
   HORARIOS_CROSS_MATRICULA,
   PLANOS,
@@ -56,6 +56,8 @@ interface FormState {
   email: string;
   cpf: string;
   endereco: string;
+  complemento: string;
+  cep: string;
   whatsapp: string;
   instagram: string;
   limitacao: boolean | null;
@@ -74,6 +76,8 @@ const INITIAL_STATE: FormState = {
   email: "",
   cpf: "",
   endereco: "",
+  complemento: "",
+  cep: "",
   whatsapp: "",
   instagram: "",
   limitacao: null,
@@ -96,7 +100,7 @@ function modalidadeLabel(m: Modalidade | null): string {
   return "";
 }
 
-const HORARIO_KIDS_INFO = "Segunda, Quarta e Sexta às 17h";
+const HORARIO_KIDS_INFO = "Terça, Quinta e Sexta às 17h30";
 
 function horarioParaEnvio(m: Modalidade | null, horario: string | null): string {
   if (m === "cross") return horario ?? "";
@@ -198,6 +202,8 @@ export default function MatriculaForm() {
       email: form.email.trim(),
       cpf: form.cpf.trim(),
       endereco: form.endereco.trim(),
+      complemento: form.complemento.trim(),
+      cep: form.cep.trim(),
       whatsapp: form.whatsapp.trim(),
       instagram: form.instagram.trim() || "-",
       limitacao: form.limitacao ? form.limitacaoDesc.trim() || "Sim" : "Não",
@@ -270,6 +276,21 @@ export default function MatriculaForm() {
               <FieldInput label="E-mail *" type="email" value={form.email} onChange={(v) => update("email", v)} placeholder="seu@email.com" />
               <FieldInput label="CPF *" value={form.cpf} onChange={(v) => update("cpf", maskCPF(v))} placeholder="000.000.000-00" maxLength={14} />
               <FieldInput label="Endereço *" value={form.endereco} onChange={(v) => update("endereco", v)} placeholder="Rua, número, bairro" />
+              <FieldInput
+                label="Complemento"
+                hint={<span className="font-normal normal-case text-[var(--gray)]">(opcional)</span>}
+                value={form.complemento}
+                onChange={(v) => update("complemento", v)}
+                placeholder="Apto, bloco, ponto de referência"
+              />
+              <FieldInput
+                label="CEP"
+                hint={<span className="font-normal normal-case text-[var(--gray)]">(opcional)</span>}
+                value={form.cep}
+                onChange={(v) => update("cep", maskCEP(v))}
+                placeholder="00000-000"
+                maxLength={9}
+              />
               <FieldInput label="WhatsApp *" value={form.whatsapp} onChange={(v) => update("whatsapp", maskPhone(v))} placeholder="91988776655" />
               <FieldInput
                 label="Instagram"
@@ -459,6 +480,8 @@ export default function MatriculaForm() {
                 <ResumoItem label="E-mail" value={form.email.trim()} />
                 <ResumoItem label="CPF" value={form.cpf} />
                 <ResumoItem label="Endereço" value={form.endereco.trim()} />
+                {form.complemento.trim() && <ResumoItem label="Complemento" value={form.complemento.trim()} />}
+                {form.cep.trim() && <ResumoItem label="CEP" value={form.cep.trim()} />}
                 <ResumoItem label="WhatsApp" value={form.whatsapp} />
                 {form.instagram && <ResumoItem label="Instagram" value={form.instagram} />}
                 <ResumoItem label="Limitação" value={form.limitacao ? form.limitacaoDesc.trim() || "Sim" : "Não"} />

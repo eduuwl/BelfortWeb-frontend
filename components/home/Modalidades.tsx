@@ -27,7 +27,7 @@ const MODALIDADES: {
     icon: FaceSmileIcon,
     nome: "Funcional Kids",
     desc: "Treino funcional pensado pra criançada, com muita energia e segurança. Turma única, só na unidade Telégrafo.",
-    horarios: ["Seg, Qua e Sex · 17h", "Unidade Telégrafo"],
+    horarios: ["Ter, Qui e Sex · 17h30", "Unidade Telégrafo"],
     cta: { label: "Agendar aula grátis →", href: "/cortesia" },
   },
   {
