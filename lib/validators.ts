@@ -42,3 +42,30 @@ export function formatDate(dateStr: string): string {
 export function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
+
+// Exige nome completo de verdade (pelo menos 3 partes — nome, nome do meio e sobrenome), não só
+// "primeiro e último nome". Ex: "João Silva" é rejeitado, "João Costa Silva" passa. Cada parte
+// precisa ter 2+ letras — sem números/símbolos.
+export function nomeCompletoValido(nomeRaw: string): boolean {
+  const partes = nomeRaw.trim().split(/\s+/).filter(Boolean);
+  if (partes.length < 3) return false;
+  return partes.every((parte) => parte.length >= 2 && /^[A-Za-zÀ-ÖØ-öø-ÿ'-]+$/.test(parte));
+}
+
+/** `nascimentoISO` no formato do `<input type="date">` (`aaaa-mm-dd`). `null` se vazio/inválido. */
+export function calcularIdade(nascimentoISO: string): number | null {
+  if (!nascimentoISO) return null;
+  const [ano, mes, dia] = nascimentoISO.split('-').map(Number);
+  if (!ano || !mes || !dia) return null;
+
+  const hoje = new Date();
+  let idade = hoje.getFullYear() - ano;
+  const aniversarioJaPassouEsteAno = hoje.getMonth() + 1 > mes || (hoje.getMonth() + 1 === mes && hoje.getDate() >= dia);
+  if (!aniversarioJaPassouEsteAno) idade--;
+  return idade;
+}
+
+export function isMenorDeIdade(nascimentoISO: string): boolean {
+  const idade = calcularIdade(nascimentoISO);
+  return idade !== null && idade < 18;
+}

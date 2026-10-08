@@ -9,6 +9,8 @@ export interface MatriculaPayload {
   complemento: string;
   cep: string;
   whatsapp: string;
+  /** Segundo número de contato, obrigatório para todo aluno (independente da idade). */
+  whatsappEmergencia: string;
   instagram: string;
   limitacao: string;
   modalidade: string;
@@ -16,12 +18,19 @@ export interface MatriculaPayload {
   horario: string;
   cref: string;
   plano: string;
+  /** Nome do responsável — obrigatório apenas quando o aluno é menor de idade, "" caso contrário. */
+  responsavelNome: string;
+  /** WhatsApp do responsável — mesma regra de `responsavelNome`. */
+  responsavelWhatsapp: string;
   aceite: string;
 }
 
 export interface CortesiaPayload {
   nome: string;
+  nascimento: string;
   whatsapp: string;
+  /** Segundo número de contato, obrigatório para todo aluno (independente da idade). */
+  whatsappEmergencia: string;
   email: string;
   cpf: string;
   modalidade: string;
@@ -30,6 +39,10 @@ export interface CortesiaPayload {
   dia: string;
   datasAula: string;
   limitacao: string;
+  /** Nome do responsável — obrigatório apenas quando o aluno é menor de idade, "" caso contrário. */
+  responsavelNome: string;
+  /** WhatsApp do responsável — mesma regra de `responsavelNome`. */
+  responsavelWhatsapp: string;
 }
 
 export interface AvaliacaoPayload {

@@ -21,8 +21,21 @@ export function useSoftDelete<T extends { id: string }>(
   deleteFn: (id: string) => Promise<ActionResult>,
 ) {
   const [items, setItems] = useState<T[]>(initialItems);
+  const [prevInitialItems, setPrevInitialItems] = useState(initialItems);
   const [pending, setPending] = useState<PendingDelete<T> | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Re-sincroniza `items` quando o pai manda uma lista nova (nova página, nova aba de unidade).
+  // Sem isso, `items` só copia `initialItems` na primeira renderização (comportamento padrão do
+  // useState) e a tabela continua mostrando o snapshot antigo pra sempre — foi exatamente esse
+  // bug que fez a aba Sacramenta mostrar dado de Telégrafo, só "acertando" um clique depois.
+  // Ajuste durante a própria renderização (não em useEffect) é o jeito recomendado pelo React
+  // pra isso: React descarta essa renderização com o `items` velho e já refaz com o novo antes
+  // de pintar a tela, então não existe nem um flash do dado antigo.
+  if (initialItems !== prevInitialItems) {
+    setPrevInitialItems(initialItems);
+    setItems(initialItems);
+  }
 
   function requestDelete(item: T) {
     setError(null);

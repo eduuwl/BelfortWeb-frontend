@@ -34,7 +34,7 @@ import {
   SuccessTitle,
   TermoBox,
 } from "@/components/form/FormShell";
-import { cpfValido, formatDate, isValidEmail, maskCEP, maskCPF, maskPhone } from "@/lib/validators";
+import { cpfValido, formatDate, isMenorDeIdade, isValidEmail, maskCEP, maskCPF, maskPhone, nomeCompletoValido } from "@/lib/validators";
 import {
   HORARIOS_CROSS_MATRICULA,
   PLANOS,
@@ -59,6 +59,7 @@ interface FormState {
   complemento: string;
   cep: string;
   whatsapp: string;
+  whatsappEmergencia: string;
   instagram: string;
   limitacao: boolean | null;
   limitacaoDesc: string;
@@ -67,6 +68,8 @@ interface FormState {
   horario: string | null;
   crefPersonal: string;
   planoId: string | null;
+  responsavelNome: string;
+  responsavelWhatsapp: string;
   aceite: boolean;
 }
 
@@ -79,6 +82,7 @@ const INITIAL_STATE: FormState = {
   complemento: "",
   cep: "",
   whatsapp: "",
+  whatsappEmergencia: "",
   instagram: "",
   limitacao: null,
   limitacaoDesc: "",
@@ -87,6 +91,8 @@ const INITIAL_STATE: FormState = {
   horario: null,
   crefPersonal: "",
   planoId: null,
+  responsavelNome: "",
+  responsavelWhatsapp: "",
   aceite: false,
 };
 
@@ -148,14 +154,17 @@ export default function MatriculaForm() {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
+  const menorDeIdade = isMenorDeIdade(form.nascimento);
+
   const step1Ok =
-    form.nome.trim().length >= 3 &&
-    form.nome.trim().includes(" ") &&
+    nomeCompletoValido(form.nome) &&
     form.nascimento !== "" &&
     isValidEmail(form.email.trim()) &&
     cpfValido(form.cpf) &&
     form.endereco.trim().length >= 5 &&
-    form.whatsapp.replace(/\D/g, "").length >= 10;
+    form.whatsapp.replace(/\D/g, "").length >= 10 &&
+    form.whatsappEmergencia.replace(/\D/g, "").length >= 10 &&
+    (!menorDeIdade || (nomeCompletoValido(form.responsavelNome) && form.responsavelWhatsapp.replace(/\D/g, "").length >= 10));
 
   const step2Ok = form.limitacao !== null;
 
@@ -205,6 +214,7 @@ export default function MatriculaForm() {
       complemento: form.complemento.trim(),
       cep: form.cep.trim(),
       whatsapp: form.whatsapp.trim(),
+      whatsappEmergencia: form.whatsappEmergencia.trim(),
       instagram: form.instagram.trim() || "-",
       limitacao: form.limitacao ? form.limitacaoDesc.trim() || "Sim" : "Não",
       modalidade: modalidadeLabel(form.modalidade),
@@ -212,6 +222,8 @@ export default function MatriculaForm() {
       horario: horarioParaEnvio(form.modalidade, form.horario),
       cref: form.modalidade === "personal" ? form.crefPersonal.trim() : "",
       plano: `${planoSelecionado.nome} — ${planoSelecionado.preco}`,
+      responsavelNome: menorDeIdade ? form.responsavelNome.trim() : "",
+      responsavelWhatsapp: menorDeIdade ? form.responsavelWhatsapp.trim() : "",
       aceite: "Sim",
     });
 
@@ -271,8 +283,36 @@ export default function MatriculaForm() {
               <StepTitle>Dados pessoais</StepTitle>
               <StepDesc>Vamos começar com suas informações básicas.</StepDesc>
 
-              <FieldInput label="Nome completo *" value={form.nome} onChange={(v) => update("nome", v)} placeholder="Ex: João Silva" />
+              <FieldInput
+                label="Nome completo *"
+                value={form.nome}
+                onChange={(v) => update("nome", v)}
+                placeholder="Ex: João Costa Silva"
+                hint={<span className="font-normal normal-case text-[var(--gray)]">(nome completo, não só primeiro e último)</span>}
+              />
               <FieldInput label="Data de nascimento *" type="date" value={form.nascimento} onChange={(v) => update("nascimento", v)} />
+
+              {menorDeIdade && (
+                <div className="mb-4 rounded-[10px] border-[1.5px] border-[var(--blue-light)] bg-[#EEF3FC] p-4">
+                  <p className="mb-3 flex items-start gap-2 text-[0.8rem] leading-relaxed text-[var(--blue)]">
+                    <ExclamationTriangleIcon className="mt-0.5 h-4 w-4 shrink-0" />
+                    <span>Aluno menor de idade — precisamos dos dados de um responsável.</span>
+                  </p>
+                  <FieldInput
+                    label="Nome completo do responsável *"
+                    value={form.responsavelNome}
+                    onChange={(v) => update("responsavelNome", v)}
+                    placeholder="Ex: Maria Costa Silva"
+                  />
+                  <FieldInput
+                    label="WhatsApp do responsável *"
+                    value={form.responsavelWhatsapp}
+                    onChange={(v) => update("responsavelWhatsapp", maskPhone(v))}
+                    placeholder="91988776655"
+                  />
+                </div>
+              )}
+
               <FieldInput label="E-mail *" type="email" value={form.email} onChange={(v) => update("email", v)} placeholder="seu@email.com" />
               <FieldInput label="CPF *" value={form.cpf} onChange={(v) => update("cpf", maskCPF(v))} placeholder="000.000.000-00" maxLength={14} />
               <FieldInput label="Endereço *" value={form.endereco} onChange={(v) => update("endereco", v)} placeholder="Rua, número, bairro" />
@@ -292,6 +332,13 @@ export default function MatriculaForm() {
                 maxLength={9}
               />
               <FieldInput label="WhatsApp *" value={form.whatsapp} onChange={(v) => update("whatsapp", maskPhone(v))} placeholder="91988776655" />
+              <FieldInput
+                label="WhatsApp de emergência *"
+                value={form.whatsappEmergencia}
+                onChange={(v) => update("whatsappEmergencia", maskPhone(v))}
+                placeholder="91988776655"
+                hint={<span className="font-normal normal-case text-[var(--gray)]">(um segundo contato, caso não consigamos falar no primeiro)</span>}
+              />
               <FieldInput
                 label="Instagram"
                 hint={<span className="font-normal normal-case text-[var(--gray)]">(opcional)</span>}
@@ -483,6 +530,13 @@ export default function MatriculaForm() {
                 {form.complemento.trim() && <ResumoItem label="Complemento" value={form.complemento.trim()} />}
                 {form.cep.trim() && <ResumoItem label="CEP" value={form.cep.trim()} />}
                 <ResumoItem label="WhatsApp" value={form.whatsapp} />
+                <ResumoItem label="WhatsApp de emergência" value={form.whatsappEmergencia} />
+                {menorDeIdade && (
+                  <>
+                    <ResumoItem label="Responsável" value={form.responsavelNome.trim()} />
+                    <ResumoItem label="WhatsApp do responsável" value={form.responsavelWhatsapp} />
+                  </>
+                )}
                 {form.instagram && <ResumoItem label="Instagram" value={form.instagram} />}
                 <ResumoItem label="Limitação" value={form.limitacao ? form.limitacaoDesc.trim() || "Sim" : "Não"} />
                 <ResumoItem label="Modalidade" value={modalidadeLabel(form.modalidade)} />

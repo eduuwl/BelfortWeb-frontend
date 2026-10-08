@@ -45,6 +45,12 @@ export type ListFetchResult<T> =
 
 const MENSAGEM_ERRO_PADRAO = "Não conseguimos carregar os dados agora. Tente novamente em instantes.";
 
+// Page size padrão das listagens do admin — bem acima do default do backend (20), porque só
+// isso já evita a maior parte da navegação por página em dias de muita inscrição. O máximo aceito
+// pelo backend é 100 (ver MAX_LIMIT em paginate.ts do backend); a navegação Anterior/Próxima nas
+// telas cobre o resto, não importa quantos registros existam.
+const DEFAULT_PAGE_SIZE = 50;
+
 async function getList<T>(path: string): Promise<ListFetchResult<T>> {
   try {
     const res = await fetch(path, { cache: "no-store" });
@@ -61,24 +67,33 @@ async function getList<T>(path: string): Promise<ListFetchResult<T>> {
   }
 }
 
-export function fetchMatriculas(page = 1) {
-  return getList<MatriculaRecord>(`/api/admin/matricula?page=${page}`);
+/** `unidade`, quando informado, filtra a listagem no backend (ver telas com abas Telégrafo/Sacramenta). */
+function withUnidade(query: string, unidade?: string): string {
+  return unidade ? `${query}&unidade=${encodeURIComponent(unidade)}` : query;
 }
 
-export function fetchCortesias(page = 1) {
-  return getList<CortesiaRecord>(`/api/admin/cortesia?page=${page}`);
+export function fetchMatriculas(page = 1, limit = DEFAULT_PAGE_SIZE, unidade?: string) {
+  return getList<MatriculaRecord>(withUnidade(`/api/admin/matricula?page=${page}&limit=${limit}`, unidade));
 }
 
-export function fetchAvaliacoes(page = 1) {
-  return getList<AvaliacaoRecord>(`/api/admin/avaliacao-fisica?page=${page}`);
+export function fetchCortesias(page = 1, limit = DEFAULT_PAGE_SIZE, unidade?: string) {
+  return getList<CortesiaRecord>(withUnidade(`/api/admin/cortesia?page=${page}&limit=${limit}`, unidade));
 }
 
-export function fetchAvaliacoesNutricionais(page = 1) {
-  return getList<AvaliacaoNutricionalRecord>(`/api/admin/avaliacao-nutricional?page=${page}`);
+export function fetchAvaliacoes(page = 1, limit = DEFAULT_PAGE_SIZE, unidade?: string) {
+  return getList<AvaliacaoRecord>(
+    withUnidade(`/api/admin/avaliacao-fisica?page=${page}&limit=${limit}`, unidade),
+  );
 }
 
-export function fetchBanners(page = 1) {
-  return getList<BannerAdminRecord>(`/api/admin/banners?page=${page}`);
+export function fetchAvaliacoesNutricionais(page = 1, limit = DEFAULT_PAGE_SIZE, unidade?: string) {
+  return getList<AvaliacaoNutricionalRecord>(
+    withUnidade(`/api/admin/avaliacao-nutricional?page=${page}&limit=${limit}`, unidade),
+  );
+}
+
+export function fetchBanners(page = 1, limit = DEFAULT_PAGE_SIZE) {
+  return getList<BannerAdminRecord>(`/api/admin/banners?page=${page}&limit=${limit}`);
 }
 
 export type LoginResult = { ok: true } | { ok: false; message: string };
